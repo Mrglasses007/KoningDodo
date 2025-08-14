@@ -198,6 +198,17 @@ function formatCurrency(amount) {
   return amount.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+// Bereken minuut van de wedstrijd
+function getMatchMinute(startTime) {
+  const start = new Date(startTime);
+  const now = new Date();
+  const diffMinutes = Math.floor((now - start) / 60000);
+  if (diffMinutes >= 0 && diffMinutes <= 120) {
+    return `${diffMinutes}'`;
+  }
+  return null;
+}
+
 function createLeagueElement(name, key) {
   const leagueDiv = document.createElement("div");
   leagueDiv.className = "league";
@@ -256,11 +267,17 @@ function renderMatches(matches, container) {
       }
     }
 
+    let minuteText = "";
+    const minute = getMatchMinute(match.commence_time);
+    if (minute) {
+      minuteText = ` <strong>${minute}</strong>`;
+    }
+
     const matchDiv = document.createElement("div");
     matchDiv.className = "match";
     matchDiv.innerHTML = `
       <p><strong>${match.home_team} - ${match.away_team}</strong></p>
-      <p><em>${startTimeNL}</em>${scoreText}</p>
+      <p><em>${startTimeNL}${minuteText}</em>${scoreText}</p>
       <div class="odds"></div>
     `;
 
@@ -277,8 +294,11 @@ function renderMatches(matches, container) {
 }
 
 function addBet(match, outcome) {
+  if (betslip.some(b => b.match.id === match.id)) {
+    alert("Je hebt al een weddenschap voor deze wedstrijd geplaatst.");
+    return;
+  }
   const betId = `${match.id}_${outcome.name}`;
-  if (betslip.some(b => b.id === betId)) return;
   betslip.push({ id: betId, match, outcome, odds: outcome.price });
   updateBetslip();
 }
