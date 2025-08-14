@@ -4,7 +4,6 @@
 <meta charset="UTF-8" />
 <title>Koning Dodo </title>
 <style>
-  /* Body & background met dim effect */
   body, html {
     height: 100%;
     margin: 0;
@@ -17,19 +16,16 @@
     background-size: cover;
     position: relative;
   }
-  /* Overlay dim achtergrond */
   body::before {
     content: "";
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(0, 0, 0, 0.6); /* donker dim */
+    background-color: rgba(0, 0, 0, 0.6);
     pointer-events: none;
     z-index: -1;
   }
-
-  /* Header */
   header {
-    background-color: #006400cc; /* iets transparant zodat achtergrond subtiel door komt */
+    background-color: #006400cc;
     padding: 15px;
     text-align: center;
     border-bottom: 5px solid #ff8c00;
@@ -40,20 +36,15 @@
   header img {
     height: 80px;
   }
-  /* h1 is verwijderd voor meer ruimte */
-
-  /* Container */
   main {
     max-width: 1100px;
-    margin: 20px auto 40px; /* onder extra marge */
+    margin: 20px auto 40px;
     display: flex;
     gap: 20px;
     padding: 0 20px;
     min-height: 80vh;
-    position: relative; /* voor absolute positioning betslip */
+    position: relative;
   }
-
-  /* Betslip container - positie wordt via JS aangepast */
   .betslip {
     background-color: #004d00dd;
     padding: 15px;
@@ -61,7 +52,7 @@
     width: 350px;
     color: #fff;
     box-shadow: 0 0 6px 2px rgba(255, 140, 0, 0.5);
-    position: relative; /* start positie */
+    position: relative;
     top: 0;
     transition: top 0.2s ease;
   }
@@ -89,8 +80,6 @@
     transform: scale(1.05);
     box-shadow: 0 0 12px #ff8c00dd;
   }
-
-  /* Matches sectie */
   .matches {
     flex: 1;
     max-width: 700px;
@@ -156,19 +145,9 @@
   .match p {
     margin: 5px 0;
   }
-
-  /* Animaties */
   @keyframes fadeIn {
     from {opacity: 0; transform: translateY(10px);}
     to {opacity: 1; transform: translateY(0);}
-  }
-  @keyframes pulseGlow {
-    0%, 100% {
-      text-shadow: 0 0 10px #ff8c00cc;
-    }
-    50% {
-      text-shadow: 0 0 20px #ffb84ddd;
-    }
   }
 </style>
 </head>
@@ -181,17 +160,15 @@
 <main>
   <div class="betslip" id="betslip">
     <h2>Jouw Betslip</h2>
-    <input type="text" id="bettorName" placeholder="Discord naam" required />
+    <input type="text" id="bettorName" placeholder="Discord naam (@...)" required />
     <div id="bets"></div>
     <p><strong>Totaal Odds:</strong> <span id="totalOdds">1.00</span></p>
-    <p><strong>Potentiële Uitbetaling:</strong> €<span id="potentialPayout">0.00</span></p>
+    <p><strong>Potentiële Uitbetaling:</strong> €<span id="potentialPayout">0,00</span></p>
     <input type="number" id="stake" placeholder="Inzet (€)" min="1" />
     <button onclick="sendToDiscord()">Verstuur naar Discord</button>
   </div>
 
-  <div class="matches" id="matches">
-    <!-- Wedstrijden geladen via JS -->
-  </div>
+  <div class="matches" id="matches"></div>
 </main>
 
 <script>
@@ -217,39 +194,31 @@ function formatDateTimeToNL(utcDate) {
   });
 }
 
+function formatCurrency(amount) {
+  return amount.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 function createLeagueElement(name, key) {
   const leagueDiv = document.createElement("div");
   leagueDiv.className = "league";
-
   leagueDiv.innerHTML = `
-    <div class="league-header" tabindex="0" role="button" aria-expanded="false" aria-controls="list-${key}">
+    <div class="league-header" tabindex="0">
       <h2>${name}</h2>
       <span class="toggle-icon">&#9654;</span>
     </div>
-    <div class="match-list" id="list-${key}" aria-hidden="true"></div>
+    <div class="match-list" id="list-${key}"></div>
   `;
-
   const header = leagueDiv.querySelector(".league-header");
   const toggleIcon = leagueDiv.querySelector(".toggle-icon");
   const matchList = leagueDiv.querySelector(".match-list");
 
-  header.addEventListener("click", () => toggleLeague(key, leagueDiv, toggleIcon, matchList));
-  header.addEventListener("keydown", e => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      toggleLeague(key, leagueDiv, toggleIcon, matchList);
-    }
-  });
-
+  header.addEventListener("click", () => toggleLeague(key, toggleIcon, matchList));
   return leagueDiv;
 }
 
-async function toggleLeague(key, leagueDiv, toggleIcon, matchList) {
+async function toggleLeague(key, toggleIcon, matchList) {
   const expanded = toggleIcon.classList.toggle("open");
-  leagueDiv.querySelector(".league-header").setAttribute("aria-expanded", expanded);
   matchList.style.display = expanded ? "block" : "none";
-  matchList.setAttribute("aria-hidden", !expanded);
-
   if (expanded && !loadedLeagues[key]) {
     matchList.innerHTML = `<p>Laden...</p>`;
     try {
@@ -266,29 +235,32 @@ async function fetchMatches(leagueKey) {
   const url = `https://api.the-odds-api.com/v4/sports/${leagueKey}/odds/?apiKey=${apiKey}&regions=eu&markets=h2h&oddsFormat=decimal`;
   const response = await fetch(url);
   if (!response.ok) throw new Error("API error");
-  const data = await response.json();
-  return data;
+  return await response.json();
 }
 
 function renderMatches(matches, container) {
   container.innerHTML = "";
-
   matches.forEach(match => {
-    // Sorteer outcomes zodat eerste team eerste is
     const outcomesSorted = [...match.bookmakers[0].markets[0].outcomes].sort((a,b) => {
       if (a.name === match.home_team) return -1;
       if (b.name === match.home_team) return 1;
       return 0;
     });
 
+    const startTimeNL = formatDateTimeToNL(match.commence_time);
+    let scoreText = "";
+    if (match.scores && match.scores.length > 0) {
+      const scoreObj = match.scores[0];
+      if (scoreObj && scoreObj.score) {
+        scoreText = `<br><strong>Stand:</strong> ${scoreObj.score}`;
+      }
+    }
+
     const matchDiv = document.createElement("div");
     matchDiv.className = "match";
-
-    const startTimeNL = formatDateTimeToNL(match.commence_time);
-
     matchDiv.innerHTML = `
       <p><strong>${match.home_team} - ${match.away_team}</strong></p>
-      <p><em>${startTimeNL}</em></p>
+      <p><em>${startTimeNL}</em>${scoreText}</p>
       <div class="odds"></div>
     `;
 
@@ -307,27 +279,18 @@ function renderMatches(matches, container) {
 function addBet(match, outcome) {
   const betId = `${match.id}_${outcome.name}`;
   if (betslip.some(b => b.id === betId)) return;
-
-  betslip.push({
-    id: betId,
-    match,
-    outcome,
-    odds: outcome.price
-  });
+  betslip.push({ id: betId, match, outcome, odds: outcome.price });
   updateBetslip();
 }
 
 function updateBetslip() {
   const betsDiv = document.getElementById("bets");
   betsDiv.innerHTML = "";
-
   let totalOdds = 1;
   betslip.forEach(bet => {
     totalOdds *= bet.odds;
-
     const p = document.createElement("p");
     p.textContent = `${bet.match.home_team} - ${bet.match.away_team}: ${bet.outcome.name} (${bet.odds.toFixed(2)})`;
-
     const removeBtn = document.createElement("button");
     removeBtn.textContent = "Verwijder";
     removeBtn.style.marginLeft = "10px";
@@ -337,35 +300,28 @@ function updateBetslip() {
     removeBtn.style.borderRadius = "4px";
     removeBtn.style.fontSize = "12px";
     removeBtn.style.cursor = "pointer";
-
     removeBtn.addEventListener("click", () => {
       betslip = betslip.filter(b => b.id !== bet.id);
       updateBetslip();
     });
-
     p.appendChild(removeBtn);
     betsDiv.appendChild(p);
   });
-
   document.getElementById("totalOdds").textContent = totalOdds.toFixed(2);
-
-  // Potentiële uitbetaling berekenen
   const inzet = parseFloat(document.getElementById("stake").value);
-  if (inzet && inzet > 0) {
-    document.getElementById("potentialPayout").textContent = (inzet * totalOdds).toFixed(2);
-  } else {
-    document.getElementById("potentialPayout").textContent = "0.00";
-  }
+  document.getElementById("potentialPayout").textContent = formatCurrency(inzet && inzet > 0 ? inzet * totalOdds : 0);
 }
 
-document.getElementById("stake").addEventListener("input", () => {
-  updateBetslip();
-});
+document.getElementById("stake").addEventListener("input", updateBetslip);
 
 function sendToDiscord() {
   const bettorName = document.getElementById("bettorName").value.trim();
   if (!bettorName) {
-    alert("Vul alsjeblieft je naam in.");
+    alert("Vul alsjeblieft je Discord naam in.");
+    return;
+  }
+  if (!bettorName.startsWith("@")) {
+    alert("Je Discord naam moet beginnen met '@'.");
     return;
   }
   if (betslip.length === 0) {
@@ -377,29 +333,22 @@ function sendToDiscord() {
     alert("Vul een geldige inzet in.");
     return;
   }
-
   const totalOdds = parseFloat(document.getElementById("totalOdds").textContent);
-  const payout = (inzet * totalOdds).toFixed(2);
-
-  let description = `**Wedder:** ${bettorName}\n**Inzet:** €${inzet}\n**Totaal Odds:** ${totalOdds}\n**Potentiële Uitbetaling:** €${payout}\n\n**Weddenschappen:**\n`;
+  const payout = formatCurrency(inzet * totalOdds);
+  let description = `**Wedder:** ${bettorName}\n**Inzet:** €${formatCurrency(inzet)}\n**Totaal Odds:** ${totalOdds.toFixed(2)}\n**Potentiële Uitbetaling:** €${payout}\n\n**Weddenschappen:**\n`;
   betslip.forEach(bet => {
     description += `- ${bet.match.home_team} - ${bet.match.away_team}: ${bet.outcome.name} (${bet.odds.toFixed(2)})\n`;
   });
-
   const payload = {
     username: "Koning Dodo",
-    content: null,
     embeds: [{
       title: "Nieuwe weddenschap",
       description,
       color: 5763719,
-      footer: {
-        text: "Koning Dodo"
-      },
+      footer: { text: "Koning Dodo" },
       timestamp: new Date().toISOString()
     }]
   };
-
   fetch(webhookURL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -417,18 +366,13 @@ function sendToDiscord() {
   }).catch(() => alert("Er is een fout opgetreden bij het versturen."));
 }
 
-/* Lade eerst alle leagues in een keer (optioneel) */
 (async function loadAllLeagues() {
   const matchesContainer = document.getElementById("matches");
   for (const [name, key] of Object.entries(leagues)) {
-    const leagueEl = createLeagueElement(name, key);
-    matchesContainer.appendChild(leagueEl);
+    matchesContainer.appendChild(createLeagueElement(name, key));
   }
 })();
 </script>
 
 </body>
 </html>
-
-
-
