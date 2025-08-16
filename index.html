@@ -407,8 +407,11 @@ function sendToDiscord() {
 
   const payout = formatCurrency(potential);
   let description = `**Wedder:** ${bettorName}\n**Inzet:** €${formatCurrency(inzet)}\n**Totaal Odds:** ${totalOdds.toFixed(2)}\n**Potentiële Uitbetaling:** €${payout}\n\n**Weddenschappen:**\n`;
+  
+  // ✅ Toevoeging van datum en tijd
   betslip.forEach(bet => {
-    description += `- ${bet.match.home_team} - ${bet.match.away_team}: ${bet.outcome.name} (${bet.odds.toFixed(2)})\n`;
+    const matchDate = formatDateTimeToNL(bet.match.commence_time);
+    description += `- ${bet.match.home_team} - ${bet.match.away_team} (${matchDate}): ${bet.outcome.name} (${bet.odds.toFixed(2)})\n`;
   });
 
   const payload = {
