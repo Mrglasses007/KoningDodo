@@ -145,6 +145,11 @@
   .match p {
     margin: 5px 0;
   }
+  #stakeWarning, #payoutWarning {
+    color: red;
+    font-weight: bold;
+    display: none;
+  }
   @keyframes fadeIn {
     from {opacity: 0; transform: translateY(10px);}
     to {opacity: 1; transform: translateY(0);}
@@ -164,7 +169,9 @@
     <div id="bets"></div>
     <p><strong>Totaal Odds:</strong> <span id="totalOdds">1.00</span></p>
     <p><strong>Potentiële Uitbetaling:</strong> €<span id="potentialPayout">0,00</span></p>
+    <p id="payoutWarning"></p>
     <input type="number" id="stake" placeholder="Inzet (€)" min="1" />
+    <p id="stakeWarning"></p>
     <button onclick="sendToDiscord()">Verstuur naar Discord</button>
   </div>
 
@@ -184,6 +191,8 @@ const leagues = {
 
 let betslip = [];
 let loadedLeagues = {};
+const MAX_INZET = 1500000;
+const MAX_EXTRA_PAYOUT = 5000000;
 
 function formatDateTimeToNL(utcDate) {
   const date = new Date(utcDate);
@@ -198,7 +207,6 @@ function formatCurrency(amount) {
   return amount.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-// Bereken minuut van de wedstrijd
 function getMatchMinute(startTime) {
   const start = new Date(startTime);
   const now = new Date();
@@ -327,9 +335,39 @@ function updateBetslip() {
     p.appendChild(removeBtn);
     betsDiv.appendChild(p);
   });
+
   document.getElementById("totalOdds").textContent = totalOdds.toFixed(2);
   const inzet = parseFloat(document.getElementById("stake").value);
-  document.getElementById("potentialPayout").textContent = formatCurrency(inzet && inzet > 0 ? inzet * totalOdds : 0);
+  const potential = inzet && inzet > 0 ? inzet * totalOdds : 0;
+
+  const stakeInput = document.getElementById("stake");
+  const stakeWarning = document.getElementById("stakeWarning");
+  const payoutElem = document.getElementById("potentialPayout");
+  const payoutWarning = document.getElementById("payoutWarning");
+
+  // Reset warnings
+  stakeWarning.style.display = "none";
+  payoutWarning.style.display = "none";
+  stakeInput.style.border = "";
+
+  // Check inzet limit
+  if (inzet > MAX_INZET) {
+    stakeInput.style.border = "2px solid red";
+    stakeWarning.textContent = `Maximale inzet is €${formatCurrency(MAX_INZET)}.`;
+    stakeWarning.style.display = "block";
+  }
+
+  // Check payout limit
+  const maxAllowed = inzet + MAX_EXTRA_PAYOUT;
+  if (potential > maxAllowed && inzet > 0) {
+    payoutElem.style.color = "red";
+    payoutWarning.textContent = `Maximale uitbetaling is inzet + €5.000.000 (max €${formatCurrency(maxAllowed)}).`;
+    payoutWarning.style.display = "block";
+  } else {
+    payoutElem.style.color = "";
+  }
+
+  document.getElementById("potentialPayout").textContent = formatCurrency(potential);
 }
 
 document.getElementById("stake").addEventListener("input", updateBetslip);
@@ -348,17 +386,31 @@ function sendToDiscord() {
     alert("Je hebt nog geen weddenschappen toegevoegd.");
     return;
   }
+
   const inzet = parseFloat(document.getElementById("stake").value);
   if (!inzet || inzet <= 0) {
     alert("Vul een geldige inzet in.");
     return;
   }
+  if (inzet > MAX_INZET) {
+    alert(`Je inzet is te hoog! Maximale inzet: €${formatCurrency(MAX_INZET)}.`);
+    return;
+  }
+
   const totalOdds = parseFloat(document.getElementById("totalOdds").textContent);
-  const payout = formatCurrency(inzet * totalOdds);
+  const potential = inzet * totalOdds;
+  const maxAllowed = inzet + MAX_EXTRA_PAYOUT;
+  if (potential > maxAllowed) {
+    alert(`Je potentiële uitbetaling is te hoog! Max toegestaan: €${formatCurrency(maxAllowed)}.`);
+    return;
+  }
+
+  const payout = formatCurrency(potential);
   let description = `**Wedder:** ${bettorName}\n**Inzet:** €${formatCurrency(inzet)}\n**Totaal Odds:** ${totalOdds.toFixed(2)}\n**Potentiële Uitbetaling:** €${payout}\n\n**Weddenschappen:**\n`;
   betslip.forEach(bet => {
     description += `- ${bet.match.home_team} - ${bet.match.away_team}: ${bet.outcome.name} (${bet.odds.toFixed(2)})\n`;
   });
+
   const payload = {
     username: "Koning Dodo",
     embeds: [{
@@ -369,6 +421,7 @@ function sendToDiscord() {
       timestamp: new Date().toISOString()
     }]
   };
+
   fetch(webhookURL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
