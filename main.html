@@ -190,7 +190,7 @@
 </main>
 
 <script>
-const apiKey = "9b7a7c15dd348a78c4feee37ded6e1d0";
+const apiKey = "169c6f4526c9ffe0c9abfc490ca578f6";
 const webhookURL = "https://discord.com/api/webhooks/1404901242307608706/KpY04R63ezeTL6WQCFvtLd1HwlA9_JeR0GhtfpVniqMgsOV6lhLtQMuV3-bHeM1LfxwU";
 
 const leagues = {
@@ -228,6 +228,15 @@ function getMatchMinute(startTime) {
     return `${diffMinutes}'`;
   }
   return null;
+}
+
+// Helper: check of match binnen 7 dagen is
+function isWithinNext7Days(dateString) {
+  const matchDate = new Date(dateString);
+  const now = new Date();
+  const sevenDaysLater = new Date();
+  sevenDaysLater.setDate(now.getDate() + 7);
+  return matchDate >= now && matchDate <= sevenDaysLater;
 }
 
 function createLeagueElement(name, key) {
@@ -272,7 +281,11 @@ async function fetchMatches(leagueKey) {
 
 function renderMatches(matches, container) {
   container.innerHTML = "";
-  matches.forEach(match => {
+
+  // Filter wedstrijden op max 7 dagen in de toekomst
+  const upcomingMatches = matches.filter(match => isWithinNext7Days(match.commence_time));
+
+  upcomingMatches.forEach(match => {
     const outcomesSorted = [...match.bookmakers[0].markets[0].outcomes].sort((a,b) => {
       if (a.name === match.home_team) return -1;
       if (b.name === match.home_team) return 1;
@@ -311,6 +324,10 @@ function renderMatches(matches, container) {
 
     container.appendChild(matchDiv);
   });
+
+  if (upcomingMatches.length === 0) {
+    container.innerHTML = "<p>Geen wedstrijden in de komende 7 dagen.</p>";
+  }
 }
 
 function addBet(match, outcome) {
@@ -407,7 +424,6 @@ function sendToDiscord() {
   const totalOdds = parseFloat(document.getElementById("totalOdds").textContent);
   const potential = inzet * totalOdds;
 
-  // Voeg max uitbetaling toe in Discord als potentiële uitbetaling boven MAX_PAYOUT ligt
   let payoutText = `€${formatCurrency(potential)}`;
   if (potential > MAX_PAYOUT) {
       payoutText += ` (Max uitbetaling €${formatCurrency(MAX_PAYOUT)})`;
@@ -451,4 +467,3 @@ function sendToDiscord() {
 
 </body>
 </html>
-
