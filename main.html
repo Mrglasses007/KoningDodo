@@ -381,9 +381,11 @@ function updateBetslip() {
 
   if (potential > MAX_PAYOUT && inzet > 0) {
     payoutElem.style.color = "red";
-    payoutWarning.textContent = `Maximale uitbetaling is €${formatCurrency(MAX_PAYOUT)}.`;
+    payoutWarning.textContent = `Maximale uitbetaling is €${formatCurrency(MAX_PAYOUT)}. Je potentiële uitbetaling is €${formatCurrency(potential)}.`;
     payoutWarning.style.display = "block";
-    valid = false;
+  } else {
+    payoutElem.style.color = "";
+    payoutWarning.style.display = "none";
   }
 
   document.getElementById("potentialPayout").textContent = formatCurrency(potential);
@@ -404,9 +406,14 @@ function sendToDiscord() {
 
   const totalOdds = parseFloat(document.getElementById("totalOdds").textContent);
   const potential = inzet * totalOdds;
-  if (potential > MAX_PAYOUT) { alert(`Potentiële uitbetaling mag maximaal €${formatCurrency(MAX_PAYOUT)} zijn.`); return; }
 
-  let description = `**Wedder:** ${bettorName}\n**Inzet:** €${formatCurrency(inzet)}\n**Totaal Odds:** ${totalOdds.toFixed(2)}\n**Potentiële Uitbetaling:** €${formatCurrency(potential)}\n\n**Weddenschappen:**\n`;
+  // Voeg max uitbetaling toe in Discord als potentiële uitbetaling boven MAX_PAYOUT ligt
+  let payoutText = `€${formatCurrency(potential)}`;
+  if (potential > MAX_PAYOUT) {
+      payoutText += ` (Max uitbetaling €${formatCurrency(MAX_PAYOUT)})`;
+  }
+
+  let description = `**Wedder:** ${bettorName}\n**Inzet:** €${formatCurrency(inzet)}\n**Totaal Odds:** ${totalOdds.toFixed(2)}\n**Potentiële Uitbetaling:** ${payoutText}\n\n**Weddenschappen:**\n`;
   betslip.forEach(bet => {
     const matchDate = formatDateTimeToNL(bet.match.commence_time);
     description += `- ${bet.match.home_team} - ${bet.match.away_team} (${matchDate}): ${bet.outcome.name} (${bet.odds.toFixed(2)})\n`;
