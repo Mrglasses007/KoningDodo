@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8" />
-<title>Koning Dodo </title>
+<title>Koning Dodo</title>
 <style>
   body, html {
     height: 100%;
@@ -52,9 +52,9 @@
     width: 350px;
     color: #fff;
     box-shadow: 0 0 6px 2px rgba(255, 140, 0, 0.5);
-    position: relative;
-    top: 0;
-    transition: top 0.2s ease;
+    position: sticky;
+    top: 20px;
+    align-self: flex-start;
   }
   .betslip h2 {
     color: #ff8c00;
@@ -75,10 +75,14 @@
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
   }
-  .betslip button:hover {
+  .betslip button:hover:enabled {
     background-color: #e07b00;
     transform: scale(1.05);
     box-shadow: 0 0 12px #ff8c00dd;
+  }
+  .betslip button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
   .matches {
     flex: 1;
@@ -150,6 +154,12 @@
     font-weight: bold;
     display: none;
   }
+  .bet-info {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #ffcc00;
+    text-align: center;
+  }
   @keyframes fadeIn {
     from {opacity: 0; transform: translateY(10px);}
     to {opacity: 1; transform: translateY(0);}
@@ -172,14 +182,15 @@
     <p id="payoutWarning"></p>
     <input type="number" id="stake" placeholder="Inzet (€)" min="50000" />
     <p id="stakeWarning"></p>
-    <button onclick="sendToDiscord()">Verstuur naar Discord</button>
+    <button id="sendBtn" onclick="sendToDiscord()">Verstuur naar Discord</button>
+    <p class="bet-info">Minimale inzet 50K • Maximale inzet 250K • Maximale uitbetaling 1.75M</p>
   </div>
 
   <div class="matches" id="matches"></div>
 </main>
 
 <script>
-const apiKey = "9b7a7c15dd348a78c4feee37ded6e1d0";
+const apiKey = "169c6f4526c9ffe0c9abfc490ca578f6";
 const webhookURL = "https://discord.com/api/webhooks/1404901242307608706/KpY04R63ezeTL6WQCFvtLd1HwlA9_JeR0GhtfpVniqMgsOV6lhLtQMuV3-bHeM1LfxwU";
 
 const leagues = {
@@ -191,8 +202,8 @@ const leagues = {
 
 let betslip = [];
 let loadedLeagues = {};
-const MIN_INZET = 50000;
 const MAX_INZET = 250000;
+const MIN_INZET = 50000;
 const MAX_PAYOUT = 1750000;
 
 function formatDateTimeToNL(utcDate) {
@@ -268,12 +279,25 @@ function renderMatches(matches, container) {
     });
 
     const startTimeNL = formatDateTimeToNL(match.commence_time);
+    let scoreText = "";
+    if (match.scores && match.scores.length > 0) {
+      const scoreObj = match.scores[0];
+      if (scoreObj && scoreObj.score) {
+        scoreText = `<br><strong>Stand:</strong> ${scoreObj.score}`;
+      }
+    }
+
+    let minuteText = "";
+    const minute = getMatchMinute(match.commence_time);
+    if (minute) {
+      minuteText = ` <strong>${minute}</strong>`;
+    }
 
     const matchDiv = document.createElement("div");
     matchDiv.className = "match";
     matchDiv.innerHTML = `
       <p><strong>${match.home_team} - ${match.away_team}</strong></p>
-      <p><em>${startTimeNL}</em></p>
+      <p><em>${startTimeNL}${minuteText}</em>${scoreText}</p>
       <div class="odds"></div>
     `;
 
@@ -332,70 +356,58 @@ function updateBetslip() {
   const stakeWarning = document.getElementById("stakeWarning");
   const payoutElem = document.getElementById("potentialPayout");
   const payoutWarning = document.getElementById("payoutWarning");
+  const sendBtn = document.getElementById("sendBtn");
 
   stakeWarning.style.display = "none";
   payoutWarning.style.display = "none";
   stakeInput.style.border = "";
+  payoutElem.style.color = "";
 
-  if (inzet < MIN_INZET && inzet > 0) {
+  let valid = true;
+
+  if (!inzet || inzet < MIN_INZET) {
     stakeInput.style.border = "2px solid red";
     stakeWarning.textContent = `Minimale inzet is €${formatCurrency(MIN_INZET)}.`;
     stakeWarning.style.display = "block";
+    valid = false;
   }
+
   if (inzet > MAX_INZET) {
     stakeInput.style.border = "2px solid red";
     stakeWarning.textContent = `Maximale inzet is €${formatCurrency(MAX_INZET)}.`;
     stakeWarning.style.display = "block";
+    valid = false;
   }
 
-  if (potential > MAX_PAYOUT) {
+  if (potential > MAX_PAYOUT && inzet > 0) {
     payoutElem.style.color = "red";
     payoutWarning.textContent = `Maximale uitbetaling is €${formatCurrency(MAX_PAYOUT)}.`;
     payoutWarning.style.display = "block";
-  } else {
-    payoutElem.style.color = "";
+    valid = false;
   }
 
   document.getElementById("potentialPayout").textContent = formatCurrency(potential);
+
+  sendBtn.disabled = !valid;
 }
 
 document.getElementById("stake").addEventListener("input", updateBetslip);
 
 function sendToDiscord() {
   const bettorName = document.getElementById("bettorName").value.trim();
-  if (!bettorName) {
-    alert("Vul alsjeblieft je Discord naam in.");
-    return;
-  }
-  if (!bettorName.startsWith("@")) {
-    alert("Je Discord naam moet beginnen met '@'.");
-    return;
-  }
-  if (betslip.length === 0) {
-    alert("Je hebt nog geen weddenschappen toegevoegd.");
-    return;
-  }
+  if (!bettorName) { alert("Vul alsjeblieft je Discord naam in."); return; }
+  if (!bettorName.startsWith("@")) { alert("Je Discord naam moet beginnen met '@'."); return; }
+  if (betslip.length === 0) { alert("Je hebt nog geen weddenschappen toegevoegd."); return; }
 
   const inzet = parseFloat(document.getElementById("stake").value);
-  if (!inzet || inzet < MIN_INZET) {
-    alert(`Minimale inzet is €${formatCurrency(MIN_INZET)}.`);
-    return;
-  }
-  if (inzet > MAX_INZET) {
-    alert(`Je inzet is te hoog! Maximale inzet: €${formatCurrency(MAX_INZET)}.`);
-    return;
-  }
+  if (!inzet || inzet <= 0) { alert("Vul een geldige inzet in."); return; }
+  if (inzet < MIN_INZET || inzet > MAX_INZET) { alert(`Inzet moet tussen €${formatCurrency(MIN_INZET)} en €${formatCurrency(MAX_INZET)} liggen.`); return; }
 
   const totalOdds = parseFloat(document.getElementById("totalOdds").textContent);
   const potential = inzet * totalOdds;
-  if (potential > MAX_PAYOUT) {
-    alert(`Je potentiële uitbetaling is te hoog! Max toegestaan: €${formatCurrency(MAX_PAYOUT)}.`);
-    return;
-  }
+  if (potential > MAX_PAYOUT) { alert(`Potentiële uitbetaling mag maximaal €${formatCurrency(MAX_PAYOUT)} zijn.`); return; }
 
-  const payout = formatCurrency(potential);
-  let description = `**Wedder:** ${bettorName}\n**Inzet:** €${formatCurrency(inzet)}\n**Totaal Odds:** ${totalOdds.toFixed(2)}\n**Potentiële Uitbetaling:** €${payout}\n\n**Weddenschappen:**\n`;
-  
+  let description = `**Wedder:** ${bettorName}\n**Inzet:** €${formatCurrency(inzet)}\n**Totaal Odds:** ${totalOdds.toFixed(2)}\n**Potentiële Uitbetaling:** €${formatCurrency(potential)}\n\n**Weddenschappen:**\n`;
   betslip.forEach(bet => {
     const matchDate = formatDateTimeToNL(bet.match.commence_time);
     description += `- ${bet.match.home_team} - ${bet.match.away_team} (${matchDate}): ${bet.outcome.name} (${bet.odds.toFixed(2)})\n`;
@@ -403,13 +415,7 @@ function sendToDiscord() {
 
   const payload = {
     username: "Koning Dodo",
-    embeds: [{
-      title: "Nieuwe weddenschap",
-      description,
-      color: 5763719,
-      footer: { text: "Koning Dodo" },
-      timestamp: new Date().toISOString()
-    }]
+    embeds: [{ title: "Nieuwe weddenschap", description, color: 5763719, footer: { text: "Koning Dodo" }, timestamp: new Date().toISOString() }]
   };
 
   fetch(webhookURL, {
@@ -439,4 +445,3 @@ function sendToDiscord() {
 
 </body>
 </html>
-
