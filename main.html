@@ -205,6 +205,7 @@ let loadedLeagues = {};
 const MAX_INZET = 250000;
 const MIN_INZET = 50000;
 const MAX_PAYOUT = 1750000;
+const ODDS_ADJUSTMENT = 0.900; // 10% verlaagd
 
 function formatDateTimeToNL(utcDate) {
   const date = new Date(utcDate);
@@ -289,9 +290,7 @@ function renderMatches(matches, container) {
 
     let minuteText = "";
     const minute = getMatchMinute(match.commence_time);
-    if (minute) {
-      minuteText = ` <strong>${minute}</strong>`;
-    }
+    if (minute) minuteText = ` <strong>${minute}</strong>`;
 
     const matchDiv = document.createElement("div");
     matchDiv.className = "match";
@@ -303,9 +302,10 @@ function renderMatches(matches, container) {
 
     const oddsDiv = matchDiv.querySelector(".odds");
     outcomesSorted.forEach(outcome => {
+      const adjustedOdds = outcome.price * ODDS_ADJUSTMENT;
       const btn = document.createElement("button");
-      btn.textContent = `${outcome.name} (${outcome.price.toFixed(2)})`;
-      btn.addEventListener("click", () => addBet(match, outcome));
+      btn.textContent = `${outcome.name} (${adjustedOdds.toFixed(2)})`;
+      btn.addEventListener("click", () => addBet(match, { ...outcome, price: adjustedOdds }));
       oddsDiv.appendChild(btn);
     });
 
@@ -387,7 +387,6 @@ function updateBetslip() {
   }
 
   document.getElementById("potentialPayout").textContent = formatCurrency(potential);
-
   sendBtn.disabled = !valid;
 }
 
