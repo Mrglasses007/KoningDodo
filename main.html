@@ -170,7 +170,7 @@
     <p><strong>Totaal Odds:</strong> <span id="totalOdds">1.00</span></p>
     <p><strong>Potentiële Uitbetaling:</strong> €<span id="potentialPayout">0,00</span></p>
     <p id="payoutWarning"></p>
-    <input type="number" id="stake" placeholder="Inzet (€)" min="1" />
+    <input type="number" id="stake" placeholder="Inzet (€)" min="50000" />
     <p id="stakeWarning"></p>
     <button onclick="sendToDiscord()">Verstuur naar Discord</button>
   </div>
@@ -191,8 +191,9 @@ const leagues = {
 
 let betslip = [];
 let loadedLeagues = {};
-const MAX_INZET = 1500000;
-const MAX_EXTRA_PAYOUT = 5000000;
+const MIN_INZET = 50000;
+const MAX_INZET = 250000;
+const MAX_PAYOUT = 1750000;
 
 function formatDateTimeToNL(utcDate) {
   const date = new Date(utcDate);
@@ -267,25 +268,12 @@ function renderMatches(matches, container) {
     });
 
     const startTimeNL = formatDateTimeToNL(match.commence_time);
-    let scoreText = "";
-    if (match.scores && match.scores.length > 0) {
-      const scoreObj = match.scores[0];
-      if (scoreObj && scoreObj.score) {
-        scoreText = `<br><strong>Stand:</strong> ${scoreObj.score}`;
-      }
-    }
-
-    let minuteText = "";
-    const minute = getMatchMinute(match.commence_time);
-    if (minute) {
-      minuteText = ` <strong>${minute}</strong>`;
-    }
 
     const matchDiv = document.createElement("div");
     matchDiv.className = "match";
     matchDiv.innerHTML = `
       <p><strong>${match.home_team} - ${match.away_team}</strong></p>
-      <p><em>${startTimeNL}${minuteText}</em>${scoreText}</p>
+      <p><em>${startTimeNL}</em></p>
       <div class="odds"></div>
     `;
 
@@ -345,23 +333,24 @@ function updateBetslip() {
   const payoutElem = document.getElementById("potentialPayout");
   const payoutWarning = document.getElementById("payoutWarning");
 
-  // Reset warnings
   stakeWarning.style.display = "none";
   payoutWarning.style.display = "none";
   stakeInput.style.border = "";
 
-  // Check inzet limit
+  if (inzet < MIN_INZET && inzet > 0) {
+    stakeInput.style.border = "2px solid red";
+    stakeWarning.textContent = `Minimale inzet is €${formatCurrency(MIN_INZET)}.`;
+    stakeWarning.style.display = "block";
+  }
   if (inzet > MAX_INZET) {
     stakeInput.style.border = "2px solid red";
     stakeWarning.textContent = `Maximale inzet is €${formatCurrency(MAX_INZET)}.`;
     stakeWarning.style.display = "block";
   }
 
-  // Check payout limit
-  const maxAllowed = inzet + MAX_EXTRA_PAYOUT;
-  if (potential > maxAllowed && inzet > 0) {
+  if (potential > MAX_PAYOUT) {
     payoutElem.style.color = "red";
-    payoutWarning.textContent = `Maximale uitbetaling is inzet + €5.000.000 (max €${formatCurrency(maxAllowed)}).`;
+    payoutWarning.textContent = `Maximale uitbetaling is €${formatCurrency(MAX_PAYOUT)}.`;
     payoutWarning.style.display = "block";
   } else {
     payoutElem.style.color = "";
@@ -388,8 +377,8 @@ function sendToDiscord() {
   }
 
   const inzet = parseFloat(document.getElementById("stake").value);
-  if (!inzet || inzet <= 0) {
-    alert("Vul een geldige inzet in.");
+  if (!inzet || inzet < MIN_INZET) {
+    alert(`Minimale inzet is €${formatCurrency(MIN_INZET)}.`);
     return;
   }
   if (inzet > MAX_INZET) {
@@ -399,16 +388,14 @@ function sendToDiscord() {
 
   const totalOdds = parseFloat(document.getElementById("totalOdds").textContent);
   const potential = inzet * totalOdds;
-  const maxAllowed = inzet + MAX_EXTRA_PAYOUT;
-  if (potential > maxAllowed) {
-    alert(`Je potentiële uitbetaling is te hoog! Max toegestaan: €${formatCurrency(maxAllowed)}.`);
+  if (potential > MAX_PAYOUT) {
+    alert(`Je potentiële uitbetaling is te hoog! Max toegestaan: €${formatCurrency(MAX_PAYOUT)}.`);
     return;
   }
 
   const payout = formatCurrency(potential);
   let description = `**Wedder:** ${bettorName}\n**Inzet:** €${formatCurrency(inzet)}\n**Totaal Odds:** ${totalOdds.toFixed(2)}\n**Potentiële Uitbetaling:** €${payout}\n\n**Weddenschappen:**\n`;
   
-  // ✅ Toevoeging van datum en tijd
   betslip.forEach(bet => {
     const matchDate = formatDateTimeToNL(bet.match.commence_time);
     description += `- ${bet.match.home_team} - ${bet.match.away_team} (${matchDate}): ${bet.outcome.name} (${bet.odds.toFixed(2)})\n`;
@@ -452,4 +439,3 @@ function sendToDiscord() {
 
 </body>
 </html>
-
