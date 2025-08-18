@@ -206,6 +206,7 @@ const MAX_INZET = 250000;
 const MIN_INZET = 50000;
 const MAX_PAYOUT = 1750000;
 const ODDS_ADJUSTMENT = 0.900; // 10% verlaagd
+const MIN_ODDS = 1.09; // minimale odds
 
 function formatDateTimeToNL(utcDate) {
   const date = new Date(utcDate);
@@ -315,7 +316,7 @@ function renderMatches(matches, container) {
 
     const oddsDiv = matchDiv.querySelector(".odds");
     outcomesSorted.forEach(outcome => {
-      const adjustedOdds = outcome.price * ODDS_ADJUSTMENT;
+      const adjustedOdds = Math.max(MIN_ODDS, outcome.price * ODDS_ADJUSTMENT);
       const btn = document.createElement("button");
       btn.textContent = `${outcome.name} (${adjustedOdds.toFixed(2)})`;
       btn.addEventListener("click", () => addBet(match, { ...outcome, price: adjustedOdds }));
@@ -467,4 +468,3 @@ function sendToDiscord() {
 
 </body>
 </html>
-
