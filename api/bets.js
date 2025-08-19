@@ -1,4 +1,5 @@
 import fetch from "node-fetch";
+import { getBets, saveBets } from "./githubStorage.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -6,38 +7,30 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { bettorName, inzet, bets, totalOdds } = req.body;
-  const webhookURL = process.env.DISCORD_WEBHOOK_URL;
-
-  if (!bettorName || !inzet || !bets || !totalOdds) {
-    res.status(400).json({ ok: false, error: "Incomplete payload" });
-    return;
-  }
-
-  let description = `**Wedder:** ${bettorName}\n**Inzet:** €${inzet.toLocaleString()}\n**Totaal Odds:** ${totalOdds.toFixed(2)}\n\n**Weddenschappen:**\n`;
-  bets.forEach(bet => {
-    description += `- ${bet.match.home_team} - ${bet.match.away_team}: ${bet.outcome.name} (${bet.odds.toFixed(2)})\n`;
-  });
-
-  const payload = {
-    username: "Koning Dodo",
-    embeds: [{ title: "Nieuwe weddenschap", description, color: 5763719, footer: { text: "Koning Dodo" }, timestamp: new Date().toISOString() }]
-  };
-
   try {
-    const response = await fetch(webhookURL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+    const { bettorName, inzet, bets, totalOdds } = req.body;
 
-    if (response.ok) {
-      res.status(200).json({ ok: true });
-    } else {
-      res.status(500).json({ ok: false, error: "Failed to send to Discord" });
+    if (!bettorName || !bets || !totalOdds || !inzet) {
+      res.status(400).json({ ok: false, error: "Invalid payload" });
+      return;
     }
-  } catch (error) {
-    console.error("Error sending bet:", error);
-    res.status(500).json({ ok: false, error: error.message });
+
+    const storedBets = await getBets();
+
+    const newBets = bets.map(bet => ({
+      user: bettorName,
+      pick: `${bet.match.home_team} - ${bet.match.away_team}: ${bet.outcome.name}`,
+      stake: inzet,
+      odds: bet.odds,
+      status: "open",
+      timestamp: new Date().toISOString()
+    }));
+
+    await saveBets([...storedBets, ...newBets]);
+
+    res.status(200).json({ ok: true });
+  } catch (err) {
+    console.error("Error saving bet:", err);
+    res.status(500).json({ ok: false, error: err.message });
   }
 }
