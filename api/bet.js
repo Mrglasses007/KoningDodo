@@ -1,71 +1,32 @@
-// Ontvangt een bet van de frontend, post naar Discord (met ?wait=true) en slaat op in bets.json
-`**Inzet:** €${formatCurrency(inzet)}`,
-`**Totaal Odds:** ${totOdds.toFixed(2)}`,
-`**Potentiële Uitbetaling:** €${formatCurrency(rawPayout)}${rawPayout > MAX_PAYOUT ? ` (Max €${formatCurrency(MAX_PAYOUT)})` : ''}`,
-"",
-"**Weddenschappen:**",
-...selections.map(s => `- ${s.home} - ${s.away} (${new Date(s.commence_time).toLocaleString('nl-NL', { timeZone: 'Europe/Amsterdam' })}): ${s.pick}`)
-].join("\n");
+export default async function handler(req, res) {
+  try {
+    if (req.method !== "POST") return res.status(405).json({ error: "Alleen POST toegestaan" });
+    
+    const { bettorName, inzet, bets, totalOdds } = req.body;
 
+    if (!bettorName || !inzet || !bets || bets.length === 0) {
+      return res.status(400).json({ error: "Ongeldige data" });
+    }
 
-const payload = {
-username: "Koning Dodo",
-embeds: [
-{
-title: `Nieuwe weddenschap • ${id}`,
-description: descriptionLines,
-color: 5763719,
-footer: { text: "Koning Dodo" },
-timestamp: createdAt
-}
-]
-};
+    const webhookURL = process.env.DISCORD_WEBHOOK_URL;
 
+    const description = `**Wedder:** ${bettorName}\n**Inzet:** €${inzet}\n**Totaal Odds:** ${totalOdds.toFixed(2)}\n**Wedstrijden:**\n${bets.map(b => `- ${b.match.home_team} - ${b.match.away_team} (${b.outcome.name} ${b.odds.toFixed(2)})`).join("\n")}`;
 
-const webhookUrl = DISCORD_WEBHOOK_URL.includes("?wait=")
-? DISCORD_WEBHOOK_URL
-: `${DISCORD_WEBHOOK_URL}?wait=true`;
+    const payload = {
+      username: "Koning Dodo",
+      embeds: [{ title: "Nieuwe weddenschap", description, color: 5763719, timestamp: new Date().toISOString() }]
+    };
 
+    const discordRes = await fetch(webhookURL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
 
-const discordRes = await fetch(webhookUrl, {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify(payload)
-});
+    if (!discordRes.ok) throw new Error("Fout bij Discord");
 
-
-if (!discordRes.ok) {
-const txt = await discordRes.text();
-return res.status(500).json({ ok: false, error: `Discord webhook error: ${discordRes.status} ${txt}` });
-}
-
-
-const discordMsg = await discordRes.json(); // bevat id van bericht
-
-
-// opslaan in GitHub
-const { bets, sha } = await readBetsFile();
-const record = {
-id,
-createdAt,
-bettor,
-stake: inzet,
-totalOdds: totOdds,
-maxPayout: MAX_PAYOUT,
-payout,
-selections,
-status: "open",
-discordMessageId: discordMsg?.id || null
-};
-
-
-bets.push(record);
-const newSha = await writeBetsFile(bets, sha, `bet:create ${id}`);
-
-
-res.status(200).json({ ok: true, id, messageId: discordMsg?.id || null, sha: newSha });
-} catch (err) {
-console.error(err);
-res.status(500).json({ ok: false, error: err.message || String(err) });
-}
+    res.status(200).json({ ok: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 }
