@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { getBets, saveBets } from "./githubStorage.js";
 
 export default async function handler(req, res) {
@@ -9,25 +8,20 @@ export default async function handler(req, res) {
 
   try {
     const bets = await getBets();
-    let updated = false;
 
-    const resolvedBets = bets.map(bet => {
-      if (bet.status === "open") {
-        // Hier bepaal je de uitkomst. Voor demo: 50% kans winnen/verliezen
-        const outcome = Math.random() < 0.5 ? "won" : "lost";
-        updated = true;
-        return { ...bet, status: outcome };
-      }
-      return bet;
+    const updatedBets = bets.map(bet => {
+      if (bet.status) return bet; // als al resolved, niet opnieuw doen
+
+      // Simuleer resultaat: 50/50 kans
+      const won = Math.random() > 0.5;
+      return { ...bet, status: won ? "won" : "lost" };
     });
 
-    if (updated) {
-      await saveBets(resolvedBets);
-    }
+    await saveBets(updatedBets);
 
-    res.status(200).json({ ok: true });
+    res.status(200).json({ ok: true, message: "Alle bets geresolved." });
   } catch (err) {
-    console.error("Error resolving bets:", err);
+    console.error("Error resolving all bets:", err);
     res.status(500).json({ ok: false, error: err.message });
   }
 }
