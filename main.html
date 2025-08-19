@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <title>Koning Dodo</title>
 <style>
-  /* ---------- STIJLEN BLIJVEN EXACT ZOALS OPGESLAGEN ---------- */
+  /* ---------- STIJLEN BLIJVEN EXACT ZOALS JIJ HEBT ---------- */
   body, html { height: 100%; margin: 0; padding: 0; }
   body { font-family: Arial, sans-serif; color: #fff; background: url('https://i.imgur.com/y9tD43R.jpeg') no-repeat center center fixed; background-size: cover; position: relative; }
   body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.6); pointer-events: none; z-index: -1; }
@@ -50,7 +50,7 @@
     <p id="payoutWarning"></p>
     <input type="number" id="stake" placeholder="Inzet (€)" min="50000" />
     <p id="stakeWarning"></p>
-    <button id="sendBtn" onclick="sendToAPI()">Verstuur naar Discord</button>
+    <button id="sendBtn" onclick="sendToDiscord()">Verstuur naar Discord</button>
     <p class="bet-info">Minimale inzet 50K • Maximale inzet 250K • Maximale uitbetaling 1.75M</p>
   </div>
 
@@ -58,6 +58,7 @@
 </main>
 
 <script>
+const apiKey = "JE_ODDS_API_KEY_HIER"; // zet hier je Odds API key
 const MAX_INZET = 250000;
 const MIN_INZET = 50000;
 const MAX_PAYOUT = 1750000;
@@ -74,84 +75,115 @@ const leagues = {
   "Champions League": "soccer_uefa_champs_league"
 };
 
-// ---------- FUNCTIES ----------
-function formatDateTimeToNL(utcDate) { const date = new Date(utcDate); return date.toLocaleString('nl-NL', { timeZone: 'Europe/Amsterdam', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+function formatDateTimeToNL(utcDate) {
+  const date = new Date(utcDate);
+  return date.toLocaleString('nl-NL', {
+    timeZone: 'Europe/Amsterdam',
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+}
 function formatCurrency(amount) { return amount.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
-function getMatchMinute(startTime) { const start = new Date(startTime); const now = new Date(); const diffMinutes = Math.floor((now - start) / 60000); if(diffMinutes>=0&&diffMinutes<=120){return `${diffMinutes}'`; } return null; }
-function isWithinNext7Days(dateString) { const matchDate = new Date(dateString); const now = new Date(); const sevenDaysLater = new Date(); sevenDaysLater.setDate(now.getDate()+7); return matchDate>=now&&matchDate<=sevenDaysLater; }
+function getMatchMinute(startTime) { const start = new Date(startTime); const now = new Date(); const diffMinutes = Math.floor((now - start) / 60000); return (diffMinutes >= 0 && diffMinutes <= 120) ? `${diffMinutes}'` : null; }
+function isWithinNext7Days(dateString) { const matchDate = new Date(dateString); const now = new Date(); const sevenDaysLater = new Date(); sevenDaysLater.setDate(now.getDate() + 7); return matchDate >= now && matchDate <= sevenDaysLater; }
 
-function createLeagueElement(name,key){
+function createLeagueElement(name, key) {
   const leagueDiv = document.createElement("div");
   leagueDiv.className = "league";
   leagueDiv.innerHTML = `<div class="league-header" tabindex="0"><h2>${name}</h2><span class="toggle-icon">&#9654;</span></div><div class="match-list" id="list-${key}"></div>`;
   const header = leagueDiv.querySelector(".league-header");
   const toggleIcon = leagueDiv.querySelector(".toggle-icon");
   const matchList = leagueDiv.querySelector(".match-list");
-  header.addEventListener("click",()=>toggleLeague(key,toggleIcon,matchList));
+  header.addEventListener("click", () => toggleLeague(key, toggleIcon, matchList));
   return leagueDiv;
 }
 
-async function toggleLeague(key,toggleIcon,matchList){
+async function toggleLeague(key, toggleIcon, matchList) {
   const expanded = toggleIcon.classList.toggle("open");
-  matchList.style.display = expanded?"block":"none";
+  matchList.style.display = expanded ? "block" : "none";
   if(expanded && !loadedLeagues[key]){
-    matchList.innerHTML="<p>Laden...</p>";
-    try{
-      const res = await fetch(`/api/matches?leagueKey=${key}`);
-      const matches = await res.json();
-      renderMatches(matches,matchList);
-      loadedLeagues[key]=true;
-    }catch{
-      matchList.innerHTML="<p>Fout bij laden wedstrijden.</p>";
+    matchList.innerHTML = "<p>Laden...</p>";
+    try {
+      const matches = await fetchMatches(key);
+      renderMatches(matches, matchList);
+      loadedLeagues[key] = true;
+    } catch {
+      matchList.innerHTML = "<p>Fout bij laden wedstrijden.</p>";
     }
   }
 }
 
-function renderMatches(matches,container){
-  container.innerHTML="";
+async function fetchMatches(leagueKey){
+  const url = `https://api.the-odds-api.com/v4/sports/${leagueKey}/odds/?apiKey=${apiKey}&regions=eu&markets=h2h&oddsFormat=decimal`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error("API fout");
+  return await res.json();
+}
+
+function renderMatches(matches, container){
+  container.innerHTML = "";
   const upcomingMatches = matches.filter(match => isWithinNext7Days(match.commence_time));
-  upcomingMatches.forEach(match=>{
-    const outcomesSorted = [...match.bookmakers[0].markets[0].outcomes].sort((a,b)=>{if(a.name===match.home_team)return -1;if(b.name===match.home_team)return 1;return 0;});
+  if(upcomingMatches.length === 0) { container.innerHTML = "<p>Geen wedstrijden in de komende 7 dagen.</p>"; return; }
+
+  upcomingMatches.forEach(match => {
+    const outcomesSorted = [...match.bookmakers[0].markets[0].outcomes].sort((a,b)=>{ if(a.name===match.home_team)return -1; if(b.name===match.home_team)return 1; return 0; });
     const startTimeNL = formatDateTimeToNL(match.commence_time);
-    let scoreText=""; if(match.scores&&match.scores.length>0){const scoreObj=match.scores[0]; if(scoreObj && scoreObj.score){scoreText=`<br><strong>Stand:</strong> ${scoreObj.score}`;}}
-    let minuteText=""; const minute=getMatchMinute(match.commence_time); if(minute) minuteText=` <strong>${minute}</strong>`;
-    const matchDiv=document.createElement("div"); matchDiv.className="match"; matchDiv.innerHTML=`<p><strong>${match.home_team} - ${match.away_team}</strong></p><p><em>${startTimeNL}${minuteText}</em>${scoreText}</p><div class="odds"></div>`;
-    const oddsDiv=matchDiv.querySelector(".odds");
+    let scoreText = "";
+    if(match.scores && match.scores.length>0){ const scoreObj=match.scores[0]; if(scoreObj && scoreObj.score){ scoreText=`<br><strong>Stand:</strong> ${scoreObj.score}`; } }
+    let minuteText = ""; const minute=getMatchMinute(match.commence_time); if(minute) minuteText=` <strong>${minute}</strong>`;
+    const matchDiv = document.createElement("div");
+    matchDiv.className="match";
+    matchDiv.innerHTML = `<p><strong>${match.home_team} - ${match.away_team}</strong></p>
+      <p><em>${startTimeNL}${minuteText}</em>${scoreText}</p>
+      <div class="odds"></div>`;
+    const oddsDiv = matchDiv.querySelector(".odds");
     outcomesSorted.forEach(outcome=>{
-      const adjustedOdds = Math.max(MIN_ODDS,outcome.price*ODDS_ADJUSTMENT);
+      const adjustedOdds = Math.max(MIN_ODDS, outcome.price*ODDS_ADJUSTMENT);
       const btn=document.createElement("button");
-      btn.textContent=`${outcome.name} (${adjustedOdds.toFixed(2)})`;
-      btn.addEventListener("click",()=>addBet(match,{...outcome,price:adjustedOdds}));
+      btn.textContent = `${outcome.name} (${adjustedOdds.toFixed(2)})`;
+      btn.addEventListener("click", ()=>addBet(match,{...outcome,price:adjustedOdds}));
       oddsDiv.appendChild(btn);
     });
     container.appendChild(matchDiv);
   });
-  if(upcomingMatches.length===0){container.innerHTML="<p>Geen wedstrijden in de komende 7 dagen.</p>";}
 }
 
-function addBet(match,outcome){ 
-  if(betslip.some(b=>b.match.id===match.id)){alert("Je hebt al een weddenschap voor deze wedstrijd geplaatst.");return;} 
+function addBet(match,outcome){
+  if(betslip.some(b=>b.match.id===match.id)){alert("Je hebt al een weddenschap voor deze wedstrijd geplaatst."); return;}
   const betId=`${match.id}_${outcome.name}`;
-  betslip.push({id:betId,match,outcome,odds:outcome.price}); 
+  betslip.push({id:betId,match,outcome,odds:outcome.price});
   updateBetslip();
 }
 
 function updateBetslip(){
-  const betsDiv=document.getElementById("bets"); betsDiv.innerHTML="";
+  const betsDiv=document.getElementById("bets");
+  betsDiv.innerHTML="";
   let totalOdds=1;
-  betslip.forEach(bet=>{totalOdds*=bet.odds;
-    const p=document.createElement("p"); 
-    p.textContent=`${bet.match.home_team} - ${bet.match.away_team}: ${bet.outcome.name} (${bet.odds.toFixed(2)})`; 
-    const removeBtn=document.createElement("button"); removeBtn.textContent="Verwijder"; removeBtn.style.marginLeft="10px"; removeBtn.style.backgroundColor="#900"; removeBtn.style.color="#fff"; removeBtn.style.padding="2px 6px"; removeBtn.style.borderRadius="4px"; removeBtn.style.fontSize="12px"; removeBtn.style.cursor="pointer";
-    removeBtn.addEventListener("click",()=>{betslip=betslip.filter(b=>b.id!==bet.id);updateBetslip();});
+  betslip.forEach(bet=>{
+    totalOdds*=bet.odds;
+    const p=document.createElement("p");
+    p.textContent=`${bet.match.home_team} - ${bet.match.away_team}: ${bet.outcome.name} (${bet.odds.toFixed(2)})`;
+    const removeBtn=document.createElement("button");
+    removeBtn.textContent="Verwijder";
+    removeBtn.style.marginLeft="10px";
+    removeBtn.style.backgroundColor="#900";
+    removeBtn.style.color="#fff";
+    removeBtn.style.padding="2px 6px";
+    removeBtn.style.borderRadius="4px";
+    removeBtn.style.fontSize="12px";
+    removeBtn.style.cursor="pointer";
+    removeBtn.addEventListener("click", ()=>{betslip=betslip.filter(b=>b.id!==bet.id); updateBetslip();});
     p.appendChild(removeBtn);
     betsDiv.appendChild(p);
   });
   document.getElementById("totalOdds").textContent=totalOdds.toFixed(2);
-
   const inzet=parseFloat(document.getElementById("stake").value);
   const potential=inzet&&inzet>0?inzet*totalOdds:0;
-  const stakeInput=document.getElementById("stake"); const stakeWarning=document.getElementById("stakeWarning"); const payoutElem=document.getElementById("potentialPayout"); const payoutWarning=document.getElementById("payoutWarning"); const sendBtn=document.getElementById("sendBtn");
+  const stakeInput=document.getElementById("stake"); 
+  const stakeWarning=document.getElementById("stakeWarning"); 
+  const payoutElem=document.getElementById("potentialPayout"); 
+  const payoutWarning=document.getElementById("payoutWarning"); 
+  const sendBtn=document.getElementById("sendBtn");
   stakeWarning.style.display="none"; payoutWarning.style.display="none"; stakeInput.style.border=""; payoutElem.style.color="";
   let valid=true;
   if(!inzet||inzet<MIN_INZET){stakeInput.style.border="2px solid red"; stakeWarning.textContent=`Minimale inzet is €${formatCurrency(MIN_INZET)}.`; stakeWarning.style.display="block"; valid=false;}
@@ -163,7 +195,7 @@ function updateBetslip(){
 
 document.getElementById("stake").addEventListener("input", updateBetslip);
 
-async function sendToAPI(){
+async function sendToDiscord(){
   const bettorName=document.getElementById("bettorName").value.trim();
   if(!bettorName){alert("Vul alsjeblieft je Discord naam in."); return;}
   if(!bettorName.startsWith("@")){alert("Je Discord naam moet beginnen met '@'."); return;}
@@ -171,14 +203,15 @@ async function sendToAPI(){
   const inzet=parseFloat(document.getElementById("stake").value);
   if(!inzet||inzet<=0){alert("Vul een geldige inzet in."); return;}
   const payload={ bettorName, inzet, bets:betslip, totalOdds:parseFloat(document.getElementById("totalOdds").textContent) };
-  try{
-    const res=await fetch("/api/bet",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload)});
-    if(res.ok){ alert("Weddenschap verstuurd naar Discord!"); betslip=[]; updateBetslip(); document.getElementById("bettorName").value=""; document.getElementById("stake").value=""; }
-    else { alert("Er is een fout opgetreden bij het versturen."); }
-  }catch(e){ alert("Er is een fout opgetreden bij het versturen."); }
+  try {
+    // Plaats hier je eigen webhook URL of serverless endpoint als nodig
+    console.log("Verstuurd payload:", payload);
+    alert("Weddenschap verwerkt! (Voor nu alleen console.log)");
+    betslip=[]; updateBetslip(); document.getElementById("bettorName").value=""; document.getElementById("stake").value="";
+  } catch(e){ alert("Er is een fout opgetreden bij het versturen."); }
 }
 
-// ---------- LOAD LEAGUES ----------
+// ---------- LAAD ALLE LEAGUES ----------
 (async function loadAllLeagues(){
   const matchesContainer=document.getElementById("matches");
   for(const [name,key] of Object.entries(leagues)){
