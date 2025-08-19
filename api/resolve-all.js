@@ -1,27 +1,35 @@
-import { getBets, saveBets } from "./githubStorage.js";
+// api/resolve-all.js
+import fs from 'fs';
+import path from 'path';
+
+const STORAGE_FILE = path.join(process.cwd(), 'bets.json');
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    res.status(405).json({ ok: false, error: "Method not allowed" });
-    return;
+  if (req.method !== 'POST') {
+    return res.status(405).json({ ok: false, error: "Method not allowed" });
   }
 
   try {
-    const bets = await getBets();
+    if (!fs.existsSync(STORAGE_FILE)) {
+      return res.status(200).json({ ok: true, message: "No bets to resolve" });
+    }
 
-    const updatedBets = bets.map(bet => {
-      if (bet.status) return bet; // als al resolved, niet opnieuw doen
+    const raw = fs.readFileSync(STORAGE_FILE, 'utf-8');
+    const bets = JSON.parse(raw);
 
-      // Simuleer resultaat: 50/50 kans
-      const won = Math.random() > 0.5;
-      return { ...bet, status: won ? "won" : "lost" };
-    });
+    // Voorbeeld: alle bets als 'resolved' markeren (hier kun je echte logica toevoegen)
+    const resolvedBets = bets.map(bet => ({
+      ...bet,
+      status: 'resolved',
+      resolvedAt: Date.now()
+    }));
 
-    await saveBets(updatedBets);
+    // Opslaan
+    fs.writeFileSync(STORAGE_FILE, JSON.stringify(resolvedBets, null, 2));
 
-    res.status(200).json({ ok: true, message: "Alle bets geresolved." });
+    res.status(200).json({ ok: true });
   } catch (err) {
-    console.error("Error resolving all bets:", err);
-    res.status(500).json({ ok: false, error: err.message });
+    console.error("Resolve-all API error:", err);
+    res.status(500).json({ ok: false, error: "Internal server error" });
   }
 }
