@@ -1,25 +1,26 @@
 import { readBets, writeBets } from "./githubStorage.js";
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    res.status(405).json({ error: "Alleen POST toegestaan" });
-    return;
-  }
-
   try {
-    const bets = await readBets();
+    if (req.method !== "GET") {
+      return res.status(405).json({ ok: false, error: "Method not allowed" });
+    }
 
-    // Markeer alle open bets als “resolved”
-    const updatedBets = bets.map((b) => {
-      if (!b.status) b.status = "resolved"; // of "win"/"loss" als je dat wilt
-      return b;
+    let bets = await readBets();
+
+    // Alle open bets als "resolved" markeren (voorbeeld)
+    bets = bets.map(bet => {
+      if (!bet.status) {
+        bet.status = "resolved"; // kan ook "win" of "loss" zijn als je wilt random of calculatie
+      }
+      return bet;
     });
 
-    await writeBets(updatedBets);
+    await writeBets(bets);
 
-    res.status(200).json({ ok: true });
+    res.json({ ok: true, bets });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Kon bets niet resolven" });
+    console.error("Fout in resolve-all:", err);
+    res.status(500).json({ ok: false, error: err.message });
   }
 }
