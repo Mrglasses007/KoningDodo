@@ -4,34 +4,33 @@
 <meta charset="UTF-8" />
 <title>Koning Dodo</title>
 <style>
-/* ---------- STIJLEN BLIJVEN EXACT ZOALS JIJ HEBT ---------- */
-body, html { height: 100%; margin: 0; padding: 0; }
-body { font-family: Arial, sans-serif; color: #fff; background: url('https://i.imgur.com/y9tD43R.jpeg') no-repeat center center fixed; background-size: cover; position: relative; }
-body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.6); pointer-events: none; z-index: -1; }
-header { background-color: #006400cc; padding: 15px; text-align: center; border-bottom: 5px solid #ff8c00; position: sticky; top: 0; z-index: 20; }
-header img { height: 80px; }
-main { max-width: 1100px; margin: 20px auto 40px; display: flex; gap: 20px; padding: 0 20px; min-height: 80vh; position: relative; }
-.betslip { background-color: #004d00dd; padding: 15px; border-radius: 10px; width: 350px; color: #fff; box-shadow: 0 0 6px 2px rgba(255, 140, 0, 0.5); position: sticky; top: 20px; align-self: flex-start; }
-.betslip h2 { color: #ff8c00; }
-.betslip input, .betslip button { width: 90%; max-width: 300px; padding: 10px; margin-top: 10px; border-radius: 5px; border: none; font-size: 16px; }
-.betslip button { background-color: #ff8c00; color: #fff; font-weight: bold; cursor: pointer; transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease; }
-.betslip button:hover:enabled { background-color: #e07b00; transform: scale(1.05); box-shadow: 0 0 12px #ff8c00dd; }
-.betslip button:disabled { opacity: 0.5; cursor: not-allowed; }
-.matches { flex: 1; max-width: 700px; overflow-wrap: break-word; }
-.league { background-color: #006400dd; padding: 10px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 0 6px 2px rgba(255, 140, 0, 0.5); }
-.league-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
-.league-header h2 { margin: 0; }
-.toggle-icon { font-size: 20px; transition: transform 0.3s ease; }
-.toggle-icon.open { transform: rotate(90deg); }
-.match-list { margin-top: 10px; display: none; }
-.match { background-color: #004d00cc; padding: 10px; border-radius: 5px; margin: 5px 0; transition: background-color 0.3s ease, box-shadow 0.3s ease; cursor: pointer; animation: fadeIn 0.5s ease forwards; }
-.match:hover { background-color: rgba(0, 100, 0, 0.95); box-shadow: 0 0 10px #007700cc; }
-.odds button { background-color: #ff8c00; border: none; padding: 5px 10px; color: #fff; margin: 0 5px 5px 0; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease; }
-.odds button:hover { background-color: #e07b00; transform: scale(1.05); box-shadow: 0 0 12px #ff8c00dd; }
-.match p { margin: 5px 0; }
-#stakeWarning, #payoutWarning { color: red; font-weight: bold; display: none; }
-.bet-info { margin-top: 15px; font-size: 14px; color: #ffcc00; text-align: center; }
-@keyframes fadeIn { from {opacity: 0; transform: translateY(10px);} to {opacity: 1; transform: translateY(0);} }
+  body, html { height: 100%; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; color: #fff; background: url('https://i.imgur.com/y9tD43R.jpeg') no-repeat center center fixed; background-size: cover; position: relative; }
+  body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.6); pointer-events: none; z-index: -1; }
+  header { background-color: #006400cc; padding: 15px; text-align: center; border-bottom: 5px solid #ff8c00; position: sticky; top: 0; z-index: 20; }
+  header img { height: 80px; }
+  main { max-width: 1100px; margin: 20px auto 40px; display: flex; gap: 20px; padding: 0 20px; min-height: 80vh; position: relative; }
+  .betslip { background-color: #004d00dd; padding: 15px; border-radius: 10px; width: 350px; color: #fff; box-shadow: 0 0 6px 2px rgba(255, 140, 0, 0.5); position: sticky; top: 20px; align-self: flex-start; }
+  .betslip h2 { color: #ff8c00; }
+  .betslip input, .betslip button { width: 90%; max-width: 300px; padding: 10px; margin-top: 10px; border-radius: 5px; border: none; font-size: 16px; }
+  .betslip button { background-color: #ff8c00; color: #fff; font-weight: bold; cursor: pointer; transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease; }
+  .betslip button:hover:enabled { background-color: #e07b00; transform: scale(1.05); box-shadow: 0 0 12px #ff8c00dd; }
+  .betslip button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .matches { flex: 1; max-width: 700px; overflow-wrap: break-word; }
+  .league { background-color: #006400dd; padding: 10px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 0 6px 2px rgba(255, 140, 0, 0.5); }
+  .league-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+  .league-header h2 { margin: 0; }
+  .toggle-icon { font-size: 20px; transition: transform 0.3s ease; }
+  .toggle-icon.open { transform: rotate(90deg); }
+  .match-list { margin-top: 10px; display: none; }
+  .match { background-color: #004d00cc; padding: 10px; border-radius: 5px; margin: 5px 0; transition: background-color 0.3s ease, box-shadow 0.3s ease; cursor: pointer; animation: fadeIn 0.5s ease forwards; }
+  .match:hover { background-color: rgba(0, 100, 0, 0.95); box-shadow: 0 0 10px #007700cc; }
+  .odds button { background-color: #ff8c00; border: none; padding: 5px 10px; color: #fff; margin: 0 5px 5px 0; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease; }
+  .odds button:hover { background-color: #e07b00; transform: scale(1.05); box-shadow: 0 0 12px #ff8c00dd; }
+  .match p { margin: 5px 0; }
+  #stakeWarning, #payoutWarning { color: red; font-weight: bold; display: none; }
+  .bet-info { margin-top: 15px; font-size: 14px; color: #ffcc00; text-align: center; }
+  @keyframes fadeIn { from {opacity: 0; transform: translateY(10px);} to {opacity: 1; transform: translateY(0);} }
 </style>
 </head>
 <body>
@@ -75,29 +74,12 @@ const leagues = {
 };
 
 // ---------- FUNCTIES ----------
-function formatDateTimeToNL(utcDate) {
-  const date = new Date(utcDate);
-  return date.toLocaleString('nl-NL', { timeZone: 'Europe/Amsterdam', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-}
-function formatCurrency(amount) {
-  return amount.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-function getMatchMinute(startTime) {
-  const start = new Date(startTime);
-  const now = new Date();
-  const diffMinutes = Math.floor((now - start) / 60000);
-  if (diffMinutes >= 0 && diffMinutes <= 120) return `${diffMinutes}'`;
-  return null;
-}
-function isWithinNext7Days(dateString) {
-  const matchDate = new Date(dateString);
-  const now = new Date();
-  const sevenDaysLater = new Date();
-  sevenDaysLater.setDate(now.getDate() + 7);
-  return matchDate >= now && matchDate <= sevenDaysLater;
-}
+function formatDateTimeToNL(utcDate) { const date = new Date(utcDate); return date.toLocaleString('nl-NL', { timeZone: 'Europe/Amsterdam', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+function formatCurrency(amount) { return amount.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function getMatchMinute(startTime) { const start = new Date(startTime); const now = new Date(); const diffMinutes = Math.floor((now - start) / 60000); if (diffMinutes >= 0 && diffMinutes <= 120) { return `${diffMinutes}'`; } return null; }
+function isWithinNext7Days(dateString) { const matchDate = new Date(dateString); const now = new Date(); const sevenDaysLater = new Date(); sevenDaysLater.setDate(now.getDate() + 7); return matchDate >= now && matchDate <= sevenDaysLater; }
 
-// ---------- LEAGUES RENDEREN ----------
+// ---------- LEAGUE ELEMENT ----------
 function createLeagueElement(name, key) {
   const leagueDiv = document.createElement("div");
   leagueDiv.className = "league";
@@ -113,35 +95,110 @@ async function toggleLeague(key, toggleIcon, matchList) {
   const expanded = toggleIcon.classList.toggle("open");
   matchList.style.display = expanded ? "block" : "none";
   if (expanded && !loadedLeagues[key]) {
+    matchList.innerHTML = `<p>Laden...</p>`;
     try {
       const res = await fetch(`/api/matches?leagueKey=${key}`);
       const data = await res.json();
-      if (data.ok) renderMatches(key, data.matches);
-      else matchList.innerHTML = "<p>Geen wedstrijden gevonden.</p>";
-      loadedLeagues[key] = true;
-    } catch (err) {
-      console.error(err);
-      matchList.innerHTML = "<p>Fout bij laden van wedstrijden.</p>";
+      if(data.ok){
+        renderMatches(data.matches, matchList);
+        loadedLeagues[key] = true;
+      } else {
+        matchList.innerHTML = `<p>Fout bij laden wedstrijden.</p>`;
+      }
+    } catch {
+      matchList.innerHTML = `<p>Fout bij laden wedstrijden.</p>`;
     }
   }
 }
 
-function renderMatches(leagueKey, matches) {
-  const matchList = document.getElementById(`list-${leagueKey}`);
-  matchList.innerHTML = "";
-  matches.forEach(match => {
-    const div = document.createElement("div");
-    div.className = "match";
-    div.innerHTML = `<p><strong>${match.home_team} - ${match.away_team}</strong></p><p>${formatDateTimeToNL(match.commence_time)}</p>`;
-    matchList.appendChild(div);
+function renderMatches(matches, container) {
+  container.innerHTML = "";
+  const upcomingMatches = matches.filter(match => isWithinNext7Days(match.commence_time));
+  if(upcomingMatches.length===0){container.innerHTML="<p>Geen wedstrijden in de komende 7 dagen.</p>"; return;}
+  upcomingMatches.forEach(match => {
+    const outcomesSorted = [...match.bookmakers[0].markets[0].outcomes].sort((a,b) => { if(a.name===match.home_team)return -1; if(b.name===match.home_team)return 1; return 0; });
+    const startTimeNL = formatDateTimeToNL(match.commence_time);
+    let scoreText = "";
+    if(match.scores && match.scores.length>0){const scoreObj=match.scores[0]; if(scoreObj && scoreObj.score){scoreText=`<br><strong>Stand:</strong> ${scoreObj.score}`;}}
+    let minuteText = ""; const minute=getMatchMinute(match.commence_time); if(minute) minuteText=` <strong>${minute}</strong>`;
+    const matchDiv=document.createElement("div"); matchDiv.className="match"; matchDiv.innerHTML=`<p><strong>${match.home_team} - ${match.away_team}</strong></p><p><em>${startTimeNL}${minuteText}</em>${scoreText}</p><div class="odds"></div>`;
+    const oddsDiv=matchDiv.querySelector(".odds");
+    outcomesSorted.forEach(outcome => {
+      const adjustedOdds = Math.max(MIN_ODDS, outcome.price * ODDS_ADJUSTMENT);
+      const btn = document.createElement("button");
+      btn.textContent = `${outcome.name} (${adjustedOdds.toFixed(2)})`;
+      btn.addEventListener("click", () => addBet(match, { ...outcome, price: adjustedOdds }));
+      oddsDiv.appendChild(btn);
+    });
+    container.appendChild(matchDiv);
   });
 }
 
-// ---------- INIT ----------
-const matchesContainer = document.getElementById("matches");
-for (const [name, key] of Object.entries(leagues)) {
-  matchesContainer.appendChild(createLeagueElement(name, key));
+function addBet(match, outcome) { 
+  if(betslip.some(b=>b.match.id===match.id)){alert("Je hebt al een weddenschap voor deze wedstrijd geplaatst.");return;} 
+  const betId=`${match.id}_${outcome.name}`; 
+  betslip.push({id:betId,match,outcome,odds:outcome.price}); 
+  updateBetslip();
 }
+
+function updateBetslip() {
+  const betsDiv=document.getElementById("bets"); betsDiv.innerHTML=""; 
+  let totalOdds=1; 
+  betslip.forEach(bet=>{totalOdds*=bet.odds; 
+    const p=document.createElement("p"); 
+    p.textContent=`${bet.match.home_team} - ${bet.match.away_team}: ${bet.outcome.name} (${bet.odds.toFixed(2)})`; 
+    const removeBtn=document.createElement("button"); 
+    removeBtn.textContent="Verwijder"; 
+    removeBtn.style.marginLeft="10px"; 
+    removeBtn.style.backgroundColor="#900"; 
+    removeBtn.style.color="#fff"; 
+    removeBtn.style.padding="2px 6px"; 
+    removeBtn.style.borderRadius="4px"; 
+    removeBtn.style.fontSize="12px"; 
+    removeBtn.style.cursor="pointer"; 
+    removeBtn.addEventListener("click",()=>{betslip=betslip.filter(b=>b.id!==bet.id);updateBetslip();}); 
+    p.appendChild(removeBtn); 
+    betsDiv.appendChild(p); 
+  });
+  document.getElementById("totalOdds").textContent=totalOdds.toFixed(2);
+  const inzet=parseFloat(document.getElementById("stake").value);
+  const potential=inzet&&inzet>0?inzet*totalOdds:0;
+  const stakeInput=document.getElementById("stake"); 
+  const stakeWarning=document.getElementById("stakeWarning"); 
+  const payoutElem=document.getElementById("potentialPayout"); 
+  const payoutWarning=document.getElementById("payoutWarning"); 
+  const sendBtn=document.getElementById("sendBtn");
+  stakeWarning.style.display="none"; payoutWarning.style.display="none"; stakeInput.style.border=""; payoutElem.style.color="";
+  let valid=true;
+  if(!inzet||inzet<MIN_INZET){stakeInput.style.border="2px solid red"; stakeWarning.textContent=`Minimale inzet is €${formatCurrency(MIN_INZET)}.`; stakeWarning.style.display="block"; valid=false;}
+  if(inzet>MAX_INZET){stakeInput.style.border="2px solid red"; stakeWarning.textContent=`Maximale inzet is €${formatCurrency(MAX_INZET)}.`; stakeWarning.style.display="block"; valid=false;}
+  if(potential>MAX_PAYOUT && inzet>0){payoutElem.style.color="red"; payoutWarning.textContent=`Maximale uitbetaling is €${formatCurrency(MAX_PAYOUT)}. Je potentiële uitbetaling is €${formatCurrency(potential)}.`; payoutWarning.style.display="block";} else { payoutElem.style.color=""; payoutWarning.style.display="none"; }
+  document.getElementById("potentialPayout").textContent=formatCurrency(potential);
+  sendBtn.disabled=!valid;
+}
+
+document.getElementById("stake").addEventListener("input", updateBetslip);
+
+async function sendToAPI() {
+  const bettorName=document.getElementById("bettorName").value.trim();
+  if(!bettorName){alert("Vul alsjeblieft je Discord naam in."); return;}
+  if(!bettorName.startsWith("@")){alert("Je Discord naam moet beginnen met '@'."); return;}
+  if(betslip.length===0){alert("Je hebt nog geen weddenschappen toegevoegd."); return;}
+  const inzet=parseFloat(document.getElementById("stake").value);
+  if(!inzet||inzet<=0){alert("Vul een geldige inzet in."); return;}
+  const payload={ bettorName, inzet, bets:betslip, totalOdds:parseFloat(document.getElementById("totalOdds").textContent) };
+  try {
+    const res=await fetch("/api/bet", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload) });
+    if(res.ok){ alert("Weddenschap verstuurd naar Discord!"); betslip=[]; updateBetslip(); document.getElementById("bettorName").value=""; document.getElementById("stake").value=""; }
+    else { alert("Er is een fout opgetreden bij het versturen."); }
+  } catch(e){ alert("Er is een fout opgetreden bij het versturen."); }
+}
+
+// ---------- LAAD ALLE LEAGUES ----------
+(async function loadAllLeagues() {
+  const matchesContainer=document.getElementById("matches");
+  for(const [name,key] of Object.entries(leagues)){ matchesContainer.appendChild(createLeagueElement(name,key)); }
+})();
 </script>
 
 </body>
