@@ -1,26 +1,33 @@
-import { readBets, writeBets } from "./githubStorage.js";
+import fetch from "node-fetch";
+import { getBets, saveBets } from "./githubStorage.js";
 
 export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    res.status(405).json({ ok: false, error: "Method not allowed" });
+    return;
+  }
+
   try {
-    if (req.method !== "GET") {
-      return res.status(405).json({ ok: false, error: "Method not allowed" });
-    }
+    const bets = await getBets();
+    let updated = false;
 
-    let bets = await readBets();
-
-    // Alle open bets als "resolved" markeren (voorbeeld)
-    bets = bets.map(bet => {
-      if (!bet.status) {
-        bet.status = "resolved"; // kan ook "win" of "loss" zijn als je wilt random of calculatie
+    const resolvedBets = bets.map(bet => {
+      if (bet.status === "open") {
+        // Hier bepaal je de uitkomst. Voor demo: 50% kans winnen/verliezen
+        const outcome = Math.random() < 0.5 ? "won" : "lost";
+        updated = true;
+        return { ...bet, status: outcome };
       }
       return bet;
     });
 
-    await writeBets(bets);
+    if (updated) {
+      await saveBets(resolvedBets);
+    }
 
-    res.json({ ok: true, bets });
+    res.status(200).json({ ok: true });
   } catch (err) {
-    console.error("Fout in resolve-all:", err);
+    console.error("Error resolving bets:", err);
     res.status(500).json({ ok: false, error: err.message });
   }
 }
