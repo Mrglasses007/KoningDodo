@@ -1,33 +1,34 @@
-import { readBets } from "./githubStorage.js";
+import { getBets } from "./githubStorage.js";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
-    res.status(405).json({ error: "Alleen GET toegestaan" });
+    res.status(405).json({ ok: false, error: "Method not allowed" });
     return;
   }
 
   try {
-    const bets = await readBets();
+    const bets = await getBets();
+
     const stats = {};
 
-    bets.forEach((b) => {
-      const user = b.user || "Onbekend";
-      if (!stats[user]) stats[user] = { totalBets: 0, wins: 0, losses: 0, profit: 0 };
+    bets.forEach(bet => {
+      if (!stats[bet.user]) {
+        stats[bet.user] = { totalBets: 0, wins: 0, losses: 0, profit: 0 };
+      }
+      stats[bet.user].totalBets += 1;
 
-      stats[user].totalBets += 1;
-
-      if (b.status === "win") {
-        stats[user].wins += 1;
-        stats[user].profit += b.stake * b.odds;
-      } else if (b.status === "loss") {
-        stats[user].losses += 1;
-        stats[user].profit -= b.stake;
+      if (bet.status === "won") {
+        stats[bet.user].wins += 1;
+        stats[bet.user].profit += bet.stake * bet.odds;
+      } else if (bet.status === "lost") {
+        stats[bet.user].losses += 1;
+        stats[bet.user].profit -= bet.stake;
       }
     });
 
     res.status(200).json({ ok: true, stats });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Kon stats niet laden" });
+    console.error("Error fetching stats:", err);
+    res.status(500).json({ ok: false, error: err.message });
   }
 }
