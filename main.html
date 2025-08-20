@@ -107,7 +107,7 @@ async function toggleLeague(key,toggleIcon,matchList){
 }
 
 async function fetchMatches(leagueKey){
-  const res=await fetch(`/api/matches?leagueKey=${leagueKey}`);
+  const res=await fetch(`https://koning-dodo.vercel.app/api/matches=${leagueKey}`);
   const data=await res.json();
   if(!res.ok || !data.ok) throw new Error(data.error||"API error");
   return data.matches;
@@ -201,3 +201,4 @@ function sendToDiscord(){
 
 </body>
 </html>
+
