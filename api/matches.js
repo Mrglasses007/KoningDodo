@@ -3,7 +3,9 @@ import fs from "fs";
 import path from "path";
 
 export default async function handler(req, res) {
-  const leagueKey = req.url.split("leagueKey=")[1]; // simpele query parser
+  // Gebruik URLSearchParams voor veilige query parsing
+  const url = new URL(req.url, `http://${req.headers.host}`);
+  const leagueKey = url.searchParams.get("leagueKey");
 
   if (!leagueKey) {
     return res
@@ -18,10 +20,10 @@ export default async function handler(req, res) {
       .json({ ok: false, error: "API key niet ingesteld in environment variables" });
   }
 
-  const url = `https://api.the-odds-api.com/v4/sports/${leagueKey}/odds/?apiKey=${apiKey}&regions=eu&markets=h2h&oddsFormat=decimal`;
+  const apiUrl = `https://api.the-odds-api.com/v4/sports/${leagueKey}/odds/?apiKey=${apiKey}&regions=eu&markets=h2h&oddsFormat=decimal`;
 
   try {
-    const response = await fetch(url);
+    const response = await fetch(apiUrl);
 
     if (!response.ok) {
       return res
