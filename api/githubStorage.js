@@ -21,6 +21,7 @@ export async function readBets() {
     return JSON.parse(content || "[]");
   } catch (err) {
     if (err.status === 404) return [];
+    console.error("Fout bij lezen van bets van GitHub:", err);
     throw err;
   }
 }
@@ -31,9 +32,10 @@ export async function writeBets(bets) {
     let sha;
     try {
       const { data } = await octokit.repos.getContent({ owner, repo, path });
-      sha = data.sha;
+      sha = data.sha; // nodig voor update
     } catch (err) {
       if (err.status !== 404) throw err;
+      // bestand bestaat nog niet, sha blijft undefined
     }
 
     await octokit.repos.createOrUpdateFileContents({
@@ -45,7 +47,7 @@ export async function writeBets(bets) {
       sha,
     });
   } catch (err) {
-    console.error("Fout bij schrijven van bets:", err);
+    console.error("Fout bij schrijven van bets naar GitHub:", err);
     throw err;
   }
 }
