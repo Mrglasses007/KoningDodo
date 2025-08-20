@@ -1,21 +1,14 @@
 // api/stats.js
-import fs from 'fs';
-import path from 'path';
+import { readBets } from './githubStorage';
 
-const STORAGE_FILE = path.join(process.cwd(), 'bets.json');
-
-export default function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ ok: false, error: "Method not allowed" });
   }
 
   try {
-    if (!fs.existsSync(STORAGE_FILE)) {
-      return res.status(200).json({ ok: true, stats: {} });
-    }
-
-    const raw = fs.readFileSync(STORAGE_FILE, 'utf-8');
-    const bets = JSON.parse(raw);
+    // Bets uitlezen van GitHub
+    const bets = await readBets();
 
     const stats = {};
 
