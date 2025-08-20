@@ -2,203 +2,88 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8" />
-<title>Koning Dodo</title>
+<title>Koning Dodo - Welkom</title>
 <style>
-  body, html { height: 100%; margin: 0; padding: 0; }
-  body { font-family: Arial, sans-serif; color: #fff; background: url('https://i.imgur.com/y9tD43R.jpeg') no-repeat center center fixed; background-size: cover; position: relative; }
-  body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.6); pointer-events: none; z-index: -1; }
-  header { background-color: #006400cc; padding: 15px; text-align: center; border-bottom: 5px solid #ff8c00; position: sticky; top: 0; z-index: 20; }
-  header img { height: 80px; }
-  main { max-width: 1100px; margin: 20px auto 40px; display: flex; gap: 20px; padding: 0 20px; min-height: 80vh; position: relative; }
-  .betslip { background-color: #004d00dd; padding: 15px; border-radius: 10px; width: 350px; color: #fff; box-shadow: 0 0 6px 2px rgba(255, 140, 0, 0.5); position: sticky; top: 20px; align-self: flex-start; }
-  .betslip h2 { color: #ff8c00; }
-  .betslip input, .betslip button { width: 90%; max-width: 300px; padding: 10px; margin-top: 10px; border-radius: 5px; border: none; font-size: 16px; }
-  .betslip button { background-color: #ff8c00; color: #fff; font-weight: bold; cursor: pointer; transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease; }
-  .betslip button:hover:enabled { background-color: #e07b00; transform: scale(1.05); box-shadow: 0 0 12px #ff8c00dd; }
-  .betslip button:disabled { opacity: 0.5; cursor: not-allowed; }
-  .matches { flex: 1; max-width: 700px; overflow-wrap: break-word; }
-  .league { background-color: #006400dd; padding: 10px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 0 6px 2px rgba(255, 140, 0, 0.5); }
-  .league-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
-  .league-header h2 { margin: 0; }
-  .toggle-icon { font-size: 20px; transition: transform 0.3s ease; }
-  .toggle-icon.open { transform: rotate(90deg); }
-  .match-list { margin-top: 10px; display: none; }
-  .match { background-color: #004d00cc; padding: 10px; border-radius: 5px; margin: 5px 0; transition: background-color 0.3s ease, box-shadow 0.3s ease; cursor: pointer; animation: fadeIn 0.5s ease forwards; }
-  .match:hover { background-color: rgba(0, 100, 0, 0.95); box-shadow: 0 0 10px #007700cc; }
-  .odds button { background-color: #ff8c00; border: none; padding: 5px 10px; color: #fff; margin: 0 5px 5px 0; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease; }
-  .odds button:hover { background-color: #e07b00; transform: scale(1.05); box-shadow: 0 0 12px #ff8c00dd; }
-  .match p { margin: 5px 0; }
-  #stakeWarning, #payoutWarning { color: red; font-weight: bold; display: none; }
-  .bet-info { margin-top: 15px; font-size: 14px; color: #ffcc00; text-align: center; }
-  @keyframes fadeIn { from {opacity: 0; transform: translateY(10px);} to {opacity: 1; transform: translateY(0);} }
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    background: url('https://i.imgur.com/y9tD43R.jpeg') no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    position: relative;
+    color: #fff;
+  }
+
+  /* Zelfde overlay als main.html */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: -1;
+  }
+
+  .logo {
+    width: 50vw;
+    max-width: 600px;
+    animation: bounce 2s infinite, glow 1.5s ease-in-out infinite alternate, pulse 3s infinite;
+  }
+
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-25px); }
+    60% { transform: translateY(-12px); }
+  }
+
+  @keyframes glow {
+    from { filter: drop-shadow(0 0 20px #ff8c00); }
+    to   { filter: drop-shadow(0 0 50px #ff8c00); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  h1 {
+    color: #fff;
+    font-size: 2rem;
+    margin: 30px 0 20px;
+    text-align: center;
+    text-shadow: 0 0 15px #006400, 0 0 30px #ff8c00;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+
+  .button {
+    background-color: #ff8c00;
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 18px 60px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 0 20px #ff8c00aa;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 40px #ff8c00;
+  }
 </style>
 </head>
 <body>
-
-<header>
-  <img src="https://i.imgur.com/YpEK9A2.png" alt="Koning Dodo logo" />
-</header>
-
-<main>
-  <div class="betslip" id="betslip">
-    <h2>Jouw Betslip</h2>
-    <input type="text" id="bettorName" placeholder="Discord naam (@...)" required />
-    <div id="bets"></div>
-    <p><strong>Totaal Odds:</strong> <span id="totalOdds">1.00</span></p>
-    <p><strong>Potentiële Uitbetaling:</strong> €<span id="potentialPayout">0,00</span></p>
-    <p id="payoutWarning"></p>
-    <input type="number" id="stake" placeholder="Inzet (€)" min="50000" />
-    <p id="stakeWarning"></p>
-    <button id="sendBtn" onclick="sendToDiscord()">Verstuur naar Discord</button>
-    <p class="bet-info">Minimale inzet 50K • Maximale inzet 250K • Maximale uitbetaling 1.75M</p>
-  </div>
-
-  <div class="matches" id="matches"></div>
-</main>
-
-<script>
-const webhookURL = "https://discord.com/api/webhooks/1404901242307608706/KpY04R63ezeTL6WQCFvtLd1HwlA9_JeR0GhtfpVniqMgsOV6lhLtQMuV3-bHeM1LfxwU";
-
-const leagues = {
-  "Eredivisie": "soccer_netherlands_eredivisie",
-  "Premier League": "soccer_epl",
-  "Champions League Kwalificatie": "soccer_uefa_champs_league_qualification",
-  "Champions League": "soccer_uefa_champs_league"
-};
-
-let betslip = [];
-let loadedLeagues = {};
-const MAX_INZET = 250000;
-const MIN_INZET = 50000;
-const MAX_PAYOUT = 1750000;
-const ODDS_ADJUSTMENT = 0.9;
-const MIN_ODDS = 1.09;
-
-function formatDateTimeToNL(utcDate) {
-  return new Date(utcDate).toLocaleString('nl-NL', { timeZone: 'Europe/Amsterdam', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-}
-function formatCurrency(amount) { return amount.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
-function getMatchMinute(startTime) { const diff = Math.floor((new Date() - new Date(startTime))/60000); return (diff >=0 && diff <=120) ? `${diff}'` : null; }
-function isWithinNext7Days(dateString) { const matchDate=new Date(dateString); const now=new Date(); const sevenDaysLater=new Date(); sevenDaysLater.setDate(now.getDate()+7); return matchDate>=now && matchDate<=sevenDaysLater; }
-
-function createLeagueElement(name,key){
-  const div=document.createElement("div"); div.className="league";
-  div.innerHTML=`<div class="league-header" tabindex="0"><h2>${name}</h2><span class="toggle-icon">&#9654;</span></div><div class="match-list" id="list-${key}"></div>`;
-  const header=div.querySelector(".league-header");
-  const toggleIcon=div.querySelector(".toggle-icon");
-  const matchList=div.querySelector(".match-list");
-  header.addEventListener("click",()=>toggleLeague(key,toggleIcon,matchList));
-  return div;
-}
-
-async function toggleLeague(key,toggleIcon,matchList){
-  const expanded=toggleIcon.classList.toggle("open");
-  matchList.style.display=expanded?"block":"none";
-  if(expanded && !loadedLeagues[key]){
-    matchList.innerHTML=`<p>Laden...</p>`;
-    try{
-      const matches=await fetchMatches(key);
-      renderMatches(matches,matchList);
-      loadedLeagues[key]=true;
-    }catch{
-      matchList.innerHTML=`<p>Fout bij laden wedstrijden.</p>`;
-    }
-  }
-}
-
-async function fetchMatches(leagueKey){
-  const res=await fetch(`https://koning-dodo.vercel.app/api/matches=${leagueKey}`);
-  const data=await res.json();
-  if(!res.ok || !data.ok) throw new Error(data.error||"API error");
-  return data.matches;
-}
-
-function renderMatches(matches,container){
-  container.innerHTML="";
-  const upcoming=matches.filter(m=>isWithinNext7Days(m.commence_time));
-  if(upcoming.length===0){ container.innerHTML="<p>Geen wedstrijden in de komende 7 dagen.</p>"; return; }
-
-  upcoming.forEach(match=>{
-    const outcomes=[...match.bookmakers[0].markets[0].outcomes].sort((a,b)=>a.name===match.home_team?-1:b.name===match.home_team?1:0);
-    const start=formatDateTimeToNL(match.commence_time);
-    const minute=getMatchMinute(match.commence_time); 
-    const score=match.scores&&match.scores.length>0?`<br><strong>Stand:</strong> ${match.scores[0].score}`:"";
-    const minuteText=minute?` <strong>${minute}</strong>`:"";
-
-    const div=document.createElement("div"); div.className="match";
-    div.innerHTML=`<p><strong>${match.home_team} - ${match.away_team}</strong></p>
-                   <p><em>${start}${minuteText}</em>${score}</p>
-                   <div class="odds"></div>`;
-    const oddsDiv=div.querySelector(".odds");
-    outcomes.forEach(o=>{
-      const adjusted=Math.max(MIN_ODDS,o.price*ODDS_ADJUSTMENT);
-      const btn=document.createElement("button");
-      btn.textContent=`${o.name} (${adjusted.toFixed(2)})`;
-      btn.addEventListener("click",()=>addBet(match,{...o,price:adjusted}));
-      oddsDiv.appendChild(btn);
-    });
-    container.appendChild(div);
-  });
-}
-
-function addBet(match,outcome){
-  if(betslip.some(b=>b.match.id===match.id)){ alert("Je hebt al een weddenschap voor deze wedstrijd geplaatst."); return; }
-  const betId=`${match.id}_${outcome.name}`;
-  betslip.push({id:betId,match,outcome,odds:outcome.price});
-  updateBetslip();
-}
-function updateBetslip(){
-  const betsDiv=document.getElementById("bets"); betsDiv.innerHTML="";
-  let totalOdds=1; betslip.forEach(b=>totalOdds*=b.odds);
-  betslip.forEach(b=>{
-    const p=document.createElement("p"); p.textContent=`${b.match.home_team} - ${b.match.away_team}: ${b.outcome.name} (${b.odds.toFixed(2)})`;
-    const removeBtn=document.createElement("button"); removeBtn.textContent="Verwijder"; removeBtn.style.marginLeft="10px";
-    removeBtn.style.backgroundColor="#900"; removeBtn.style.color="#fff"; removeBtn.style.padding="2px 6px"; removeBtn.style.borderRadius="4px"; removeBtn.style.fontSize="12px"; removeBtn.style.cursor="pointer";
-    removeBtn.addEventListener("click",()=>{ betslip=betslip.filter(x=>x.id!==b.id); updateBetslip(); });
-    p.appendChild(removeBtn); betsDiv.appendChild(p);
-  });
-
-  document.getElementById("totalOdds").textContent=totalOdds.toFixed(2);
-  const inzet=parseFloat(document.getElementById("stake").value)||0;
-  const potential=inzet*totalOdds;
-  const stakeInput=document.getElementById("stake");
-  const stakeWarning=document.getElementById("stakeWarning");
-  const payoutElem=document.getElementById("potentialPayout");
-  const payoutWarning=document.getElementById("payoutWarning");
-  const sendBtn=document.getElementById("sendBtn");
-
-  stakeWarning.style.display="none"; payoutWarning.style.display="none"; stakeInput.style.border=""; payoutElem.style.color="";
-  let valid=true;
-  if(inzet<MIN_INZET){ stakeInput.style.border="2px solid red"; stakeWarning.textContent=`Minimale inzet is €${formatCurrency(MIN_INZET)}.`; stakeWarning.style.display="block"; valid=false; }
-  if(inzet>MAX_INZET){ stakeInput.style.border="2px solid red"; stakeWarning.textContent=`Maximale inzet is €${formatCurrency(MAX_INZET)}.`; stakeWarning.style.display="block"; valid=false; }
-  if(potential>MAX_PAYOUT){ payoutElem.style.color="red"; payoutWarning.textContent=`Max uitbetaling is €${formatCurrency(MAX_PAYOUT)}. Potentieel €${formatCurrency(potential)}.`; payoutWarning.style.display="block"; }
-  payoutElem.textContent=formatCurrency(potential);
-  sendBtn.disabled=!valid;
-}
-document.getElementById("stake").addEventListener("input",updateBetslip);
-
-function sendToDiscord(){
-  const bettorName=document.getElementById("bettorName").value.trim();
-  if(!bettorName||!bettorName.startsWith("@")){ alert("Vul een geldige Discord naam in (start met @)"); return; }
-  if(betslip.length===0){ alert("Je hebt nog geen weddenschappen toegevoegd."); return; }
-  const inzet=parseFloat(document.getElementById("stake").value);
-  const totalOdds=parseFloat(document.getElementById("totalOdds").textContent);
-  const potential=inzet*totalOdds;
-  let payoutText=`€${formatCurrency(potential)}`; if(potential>MAX_PAYOUT){ payoutText+=` (Max €${formatCurrency(MAX_PAYOUT)})`; }
-  let description=`**Wedder:** ${bettorName}\n**Inzet:** €${formatCurrency(inzet)}\n**Totaal Odds:** ${totalOdds.toFixed(2)}\n**Potentiële Uitbetaling:** ${payoutText}\n\n**Weddenschappen:**\n`;
-  betslip.forEach(b=>{ description+=`- ${b.match.home_team} - ${b.match.away_team} (${formatDateTimeToNL(b.match.commence_time)}): ${b.outcome.name} (${b.odds.toFixed(2)})\n`; });
-  const payload={username:"Koning Dodo", embeds:[{title:"Nieuwe weddenschap", description,color:5763719,footer:{text:"Koning Dodo"},timestamp:new Date().toISOString()}]};
-  fetch(webhookURL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
-    .then(res=>res.ok?(alert("Weddenschap verstuurd!"),betslip=[],updateBetslip(),document.getElementById("bettorName").value="",document.getElementById("stake").value=""):(alert("Fout bij versturen.")))
-    .catch(()=>alert("Fout bij versturen."));
-}
-
-(async function loadLeagues(){
-  const container=document.getElementById("matches");
-  for(const [name,key] of Object.entries(leagues)){ container.appendChild(createLeagueElement(name,key)); }
-})();
-</script>
-
+  <img src="https://i.imgur.com/YpEK9A2.png" alt="Koning Dodo logo" class="logo" />
+  <h1>Klik hier om verder te gaan</h1>
+  <button class="button" onclick="window.location.href='main.html'">Ga verder</button>
 </body>
 </html>
-
