@@ -1,8 +1,5 @@
 // api/resolve-all.js
-import fs from 'fs';
-import path from 'path';
-
-const STORAGE_FILE = path.join(process.cwd(), 'bets.json');
+import { readBets, writeBets } from './githubStorage';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -10,22 +7,22 @@ export default async function handler(req, res) {
   }
 
   try {
-    if (!fs.existsSync(STORAGE_FILE)) {
+    // Bets van GitHub uitlezen
+    const bets = await readBets();
+
+    if (bets.length === 0) {
       return res.status(200).json({ ok: true, message: "No bets to resolve" });
     }
 
-    const raw = fs.readFileSync(STORAGE_FILE, 'utf-8');
-    const bets = JSON.parse(raw);
-
-    // Voorbeeld: alle bets als 'resolved' markeren (hier kun je echte logica toevoegen)
+    // Voorbeeld: alle bets als 'resolved' markeren
     const resolvedBets = bets.map(bet => ({
       ...bet,
       status: 'resolved',
       resolvedAt: Date.now()
     }));
 
-    // Opslaan
-    fs.writeFileSync(STORAGE_FILE, JSON.stringify(resolvedBets, null, 2));
+    // Bets opslaan naar GitHub
+    await writeBets(resolvedBets);
 
     res.status(200).json({ ok: true });
   } catch (err) {
