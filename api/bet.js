@@ -1,54 +1,60 @@
-import fetch from 'node-fetch';
-import { saveBet } from './githubStorage.js';
+import { Octokit } from "@octokit/rest";
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+const octokit = new Octokit({
+  auth: process.env.GITHUB_TOKEN,
+});
 
+const owner = process.env.GITHUB_OWNER;
+const repo = process.env.GITHUB_REPO;
+const path = "bets.json"; // bestand in je repo waar alle bets in staan
+
+// Bets uitlezen
+export async function readBets() {
   try {
-    const { bettorName, inzet, bets, totalOdds } = req.body;
-
-    if (!bettorName || !bets || bets.length === 0) {
-      return res.status(400).json({ error: 'Ongeldige data' });
-    }
-
-    // --- Discord Webhook ---
-    const webhookURL = process.env.DISCORD_WEBHOOK;
-    if (!webhookURL) {
-      return res.status(500).json({ error: 'Discord webhook niet ingesteld' });
-    }
-
-    const payload = {
-      username: "Koning Dodo",
-      embeds: [{
-        title: "Nieuwe weddenschap",
-        description: `**Wedder:** ${bettorName}\n**Inzet:** €${inzet}\n**Totaal Odds:** ${totalOdds.toFixed(2)}\n\n**Weddenschappen:**\n${bets.map(b => `- ${b.match.home_team} - ${b.match.away_team}: ${b.outcome.name} (${b.odds.toFixed(2)})`).join("\n")}`,
-        color: 5763719,
-        timestamp: new Date().toISOString()
-      }]
-    };
-
-    const discordRes = await fetch(webhookURL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+    const { data } = await octokit.repos.getContent({
+      owner,
+      repo,
+      path,
     });
 
-    if (!discordRes.ok) {
-      throw new Error('Discord webhook error');
-    }
-
-    // --- Opslaan in GitHub via githubStorage.js ---
-    if (!process.env.GITHUB_TOKEN) {
-      return res.status(500).json({ error: 'GITHUB_TOKEN niet ingesteld' });
-    }
-
-    await saveBet({ bettorName, inzet, bets, totalOdds, status: 'open' });
-
-    res.json({ ok: true });
+    const content = Buffer.from(data.content, "base64").toString("utf-8");
+    return JSON.parse(content || "[]");
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
+    if (err.status === 404) return [];
+    console.error("Fout bij lezen van bets:", err);
+    throw err;
   }
+}
+
+// Bets schrijven
+export async function writeBets(newBets) {
+  try {
+    let sha;
+    try {
+      const { data } = await octokit.repos.getContent({ owner, repo, path });
+      sha = data.sha; // nodig voor update
+    } catch (err) {
+      if (err.status !== 404) throw err;
+      // bestand bestaat nog niet, sha blijft undefined
+    }
+
+    await octokit.repos.createOrUpdateFileContents({
+      owner,
+      repo,
+      path,
+      message: "Update bets",
+      content: Buffer.from(JSON.stringify(newBets, null, 2)).toString("base64"),
+      sha,
+    });
+  } catch (err) {
+    console.error("Fout bij schrijven van bets naar GitHub:", err);
+    throw err;
+  }
+}
+
+// Nieuwe bet toevoegen
+export async function addBet(bet) {
+  const bets = await readBets();
+  bets.push(bet);
+  await writeBets(bets);
 }
