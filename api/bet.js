@@ -21,7 +21,7 @@ export async function readBets() {
     return JSON.parse(content || "[]");
   } catch (err) {
     if (err.status === 404) return [];
-    console.error("Fout bij lezen van bets:", err);
+    console.error("Fout bij lezen van bets van GitHub:", err);
     throw err;
   }
 }
@@ -54,7 +54,12 @@ export async function writeBets(newBets) {
 
 // Nieuwe bet toevoegen
 export async function addBet(bet) {
-  const bets = await readBets();
-  bets.push(bet);
-  await writeBets(bets);
+  try {
+    const bets = await readBets();
+    bets.push(bet);
+    await writeBets(bets);
+  } catch (err) {
+    console.error("Fout bij toevoegen van nieuwe bet:", err);
+    throw err;
+  }
 }
