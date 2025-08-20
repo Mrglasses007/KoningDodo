@@ -1,7 +1,4 @@
-import fs from 'fs';
-import path from 'path';
-
-const STORAGE_FILE = path.join(process.cwd(), 'bets.json');
+import { readBets, writeBets } from './githubStorage';
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
@@ -11,29 +8,35 @@ export default async function handler(req, res) {
         return res.status(400).json({ ok: false, error: "Missing data" });
       }
 
-      let existingBets = [];
-      if (fs.existsSync(STORAGE_FILE)) {
-        existingBets = JSON.parse(fs.readFileSync(STORAGE_FILE, 'utf-8'));
-      }
+      // Bestaande bets uitlezen van GitHub
+      let existingBets = await readBets();
 
-      const newBet = { bettorName, inzet, bets, totalOdds, timestamp: Date.now(), status: "open" };
+      // Nieuwe bet toevoegen
+      const newBet = {
+        bettorName,
+        inzet,
+        bets,
+        totalOdds,
+        timestamp: Date.now(),
+        status: "open"
+      };
       existingBets.push(newBet);
-      fs.writeFileSync(STORAGE_FILE, JSON.stringify(existingBets, null, 2));
+
+      // Bets opslaan naar GitHub
+      await writeBets(existingBets);
 
       res.status(200).json({ ok: true });
     } catch (err) {
-      console.error(err);
+      console.error("POST /api/bets error:", err);
       res.status(500).json({ ok: false, error: "Internal server error" });
     }
   } else if (req.method === 'GET') {
     try {
-      let existingBets = [];
-      if (fs.existsSync(STORAGE_FILE)) {
-        existingBets = JSON.parse(fs.readFileSync(STORAGE_FILE, 'utf-8'));
-      }
+      // Bets uitlezen van GitHub
+      let existingBets = await readBets();
 
       // Converteer naar admin-formaat
-      const betsForAdmin = existingBets.flatMap(bet => 
+      const betsForAdmin = existingBets.flatMap(bet =>
         bet.bets.map(pick => ({
           user: bet.bettorName,
           pick,
@@ -45,7 +48,7 @@ export default async function handler(req, res) {
 
       res.status(200).json({ ok: true, bets: betsForAdmin });
     } catch (err) {
-      console.error(err);
+      console.error("GET /api/bets error:", err);
       res.status(500).json({ ok: false, error: "Internal server error" });
     }
   } else {
