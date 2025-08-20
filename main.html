@@ -1,112 +1,78 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8">
-  <title>Wedstrijden</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Betting Platform</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 20px;
-      background: #f7f7f7;
+      background: #f5f5f5;
+      padding: 20px;
     }
-    h1 {
-      color: #333;
+    h1 { color: #333; }
+    .league-button {
+      margin: 5px;
+      padding: 10px 15px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
     }
-    #matches {
-      margin-top: 20px;
-      padding: 10px;
-      background: #fff;
-      border-radius: 6px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
+    .league-button:hover { background: #0056b3; }
     .match {
-      border-bottom: 1px solid #ddd;
-      padding: 8px 0;
-    }
-    .match:last-child {
-      border-bottom: none;
-    }
-    .error {
-      color: red;
-      font-weight: bold;
-    }
-    select {
-      padding: 6px;
-      margin-top: 10px;
-      font-size: 14px;
-    }
-    .odds {
-      font-size: 14px;
-      color: #555;
-      margin-top: 4px;
+      background: #fff;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
   </style>
 </head>
 <body>
-  <h1>Beschikbare Wedstrijden</h1>
-
-  <label for="leagueSelect">Kies competitie:</label>
-  <select id="leagueSelect">
-    <option value="soccer_netherlands_eredivisie">Eredivisie (Nederland)</option>
-    <option value="soccer_epl">Premier League (Engeland)</option>
-    <option value="soccer_italy_serie_a">Serie A (Italië)</option>
-    <option value="soccer_spain_la_liga">La Liga (Spanje)</option>
-    <option value="soccer_germany_bundesliga">Bundesliga (Duitsland)</option>
-  </select>
-
-  <div id="matches">Wedstrijden worden geladen...</div>
+  <h1>Wedstrijden</h1>
+  
+  <!-- FIX: geen :1 meer achter de keys -->
+  <button class="league-button" onclick="loadMatches('soccer_netherlands_eredivisie')">Eredivisie</button>
+  <button class="league-button" onclick="loadMatches('soccer_epl')">Premier League</button>
+  <button class="league-button" onclick="loadMatches('soccer_spain_la_liga')">La Liga</button>
+  <button class="league-button" onclick="loadMatches('soccer_italy_serie_a')">Serie A</button>
+  
+  <div id="matches"></div>
 
   <script>
     async function loadMatches(leagueKey) {
-      const matchesDiv = document.getElementById("matches");
-      matchesDiv.innerHTML = "Bezig met laden...";
-
       try {
         const res = await fetch(`/api/matches?leagueKey=${leagueKey}`);
         const data = await res.json();
+        const container = document.getElementById("matches");
+        container.innerHTML = "";
 
         if (!data.ok) {
-          matchesDiv.innerHTML = `<p class="error">Fout: ${data.error}</p>`;
+          container.innerHTML = `<p style="color:red;">Fout: ${data.error}</p>`;
           return;
         }
 
-        if (data.matches.length === 0) {
-          matchesDiv.innerHTML = "<p>Geen wedstrijden gevonden.</p>";
+        if (!data.matches || data.matches.length === 0) {
+          container.innerHTML = "<p>Geen wedstrijden gevonden.</p>";
           return;
         }
 
-        matchesDiv.innerHTML = data.matches.map(match => {
-          const home = match.home_team || "Onbekend team";
-          const away = match.away_team || "Onbekend team";
-
-          // odds ophalen (eerste bookmaker pakken)
-          let oddsHtml = "";
-          if (match.bookmakers && match.bookmakers.length > 0) {
-            const markets = match.bookmakers[0].markets || [];
-            const h2h = markets.find(m => m.key === "h2h");
-            if (h2h && h2h.outcomes) {
-              oddsHtml = "<div class='odds'>" + 
-                h2h.outcomes.map(o => `${o.name}: ${o.price}`).join(" | ") +
-                "</div>";
-            }
-          }
-
-          return `<div class="match"><strong>${home}</strong> vs <strong>${away}</strong>${oddsHtml}</div>`;
-        }).join("");
+        data.matches.forEach(match => {
+          const div = document.createElement("div");
+          div.className = "match";
+          div.innerHTML = `
+            <strong>${match.home_team}</strong> vs <strong>${match.away_team}</strong><br>
+            <small>Commence: ${new Date(match.commence_time).toLocaleString()}</small>
+          `;
+          container.appendChild(div);
+        });
       } catch (err) {
         console.error("Error:", err);
-        matchesDiv.innerHTML = `<p class="error">Kon wedstrijden niet laden.</p>`;
+        document.getElementById("matches").innerHTML = "<p style='color:red;'>Kon wedstrijden niet laden.</p>";
       }
     }
-
-    // Initieel Eredivisie ophalen
-    const leagueSelect = document.getElementById("leagueSelect");
-    loadMatches(leagueSelect.value);
-
-    // Wanneer dropdown verandert -> nieuwe wedstrijden ophalen
-    leagueSelect.addEventListener("change", () => {
-      loadMatches(leagueSelect.value);
-    });
   </script>
 </body>
 </html>
