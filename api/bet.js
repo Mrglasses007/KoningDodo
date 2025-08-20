@@ -1,5 +1,9 @@
 import fetch from 'node-fetch';
+import fs from 'fs';
+import path from 'path';
 import { saveBet } from './githubStorage.js';
+
+const STORAGE_FILE = path.join(process.cwd(), 'bets.json');
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -31,7 +35,17 @@ export default async function handler(req, res) {
     if (!discordRes.ok) throw new Error('Discord webhook error');
 
     // Sla bet lokaal op via githubStorage
-    await saveBet({ bettorName, inzet, bets, totalOdds, status: 'open' });
+    await saveBet({ bettorName, inzet, bets, totalOdds, status: 'open', timestamp: Date.now() });
+
+    // Sla bet ook lokaal op in bets.json
+    let existingBets = [];
+    if (fs.existsSync(STORAGE_FILE)) {
+      existingBets = JSON.parse(fs.readFileSync(STORAGE_FILE, 'utf-8'));
+    }
+
+    const newBet = { bettorName, inzet, bets, totalOdds, status: 'open', timestamp: Date.now() };
+    existingBets.push(newBet);
+    fs.writeFileSync(STORAGE_FILE, JSON.stringify(existingBets, null, 2));
 
     res.json({ ok: true });
   } catch (err) {
