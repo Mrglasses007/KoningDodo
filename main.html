@@ -43,7 +43,6 @@
       gap: 20px;
       padding: 0 20px;
       min-height: 80vh;
-      position: relative;
     }
     .betslip {
       background-color: #004d00dd;
@@ -73,7 +72,7 @@
       color: #fff;
       font-weight: bold;
       cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      transition: background-color 0.3s ease, transform 0.2s ease;
     }
     .betslip button:hover:enabled {
       background-color: #e07b00;
@@ -139,15 +138,12 @@
       border-radius: 5px;
       cursor: pointer;
       font-weight: bold;
-      transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      transition: background-color 0.3s ease, transform 0.2s ease;
     }
     .odds button:hover {
       background-color: #e07b00;
       transform: scale(1.05);
       box-shadow: 0 0 12px #ff8c00dd;
-    }
-    .match p {
-      margin: 5px 0;
     }
     .bet-info {
       margin-top: 15px;
@@ -175,83 +171,185 @@
     <p><strong>Totaal Odds:</strong> <span id="totalOdds">1.00</span></p>
     <p><strong>Potentiële Uitbetaling:</strong> €<span id="potentialPayout">0,00</span></p>
     <input type="number" id="stake" placeholder="Inzet (€)" min="50000" />
+    <p id="stakeWarning"></p>
     <button id="sendBtn" onclick="sendToBot()">Verstuur naar bot</button>
     <p class="bet-info">Minimale inzet 50K • Maximale inzet 250K • Maximale uitbetaling 1.75M</p>
   </div>
 
-  <div class="matches" id="matches"></div>
+  <div class="matches" id="matches">
+    <!-- Leagues and matches will be populated here via JS -->
+  </div>
 </main>
 
 <script>
-const botWebhookURL = "https://4597ec1c-6185-43ab-b30b-dcc2a2186178.id.repl.co/api/betslip"; // ← Vul jouw Replit domain in
+const botWebhookURL = "https://4597ec1c-6185-43ab-b30b-dcc2a2186178.id.repl.co/api/betslip"; // Vervang dit met jouw echte Replit URL
 const apiKey = "9b7a7c15dd348a78c4feee37ded6e1d0";
+
 const leagues = {
   "Eredivisie": "soccer_netherlands_eredivisie",
-  "Premier League": "soccer_epl"
+  "Premier League": "soccer_epl",
+  "Champions League": "soccer_uefa_champs_league"
 };
 
 let betslip = [];
+
+function formatDateTimeToNL(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleString('nl-NL', {
+    timeZone: 'Europe/Amsterdam',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
 
 function formatCurrency(amount) {
   return amount.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-function updateBetslip() {
-  const betsDiv = document.getElementById("bets");
-  betsDiv.innerHTML = "";
-  let totalOdds = 1;
+function isWithinNext7Days(dateStr) {
+  const now = new Date();
+  const future = new Date();
+  future.setDate(now.getDate() + 7);
+  const d = new Date(dateStr);
+  return d >= now && d <= future;
+}
 
-  betslip.forEach(bet => {
-    totalOdds *= bet.odds;
-    const p = document.createElement("p");
-    p.textContent = `${bet.match.home_team} - ${bet.match.away_team}: ${bet.outcome.name} (${bet.odds.toFixed(2)})`;
+function createLeagueElement(name, key) {
+  const div = document.createElement('div');
+  div.className = 'league';
+  div.innerHTML = `
+    <div class="league-header" tabindex="0">
+      <h2>${name}</h2>
+      <span class="toggle-icon">&#9654;</span>
+    </div>
+    <div class="match-list" id="list-${key}"></div>
+  `;
+
+  const header = div.querySelector('.league-header');
+  const matchList = div.querySelector('.match-list');
+  const icon = div.querySelector('.toggle-icon');
+
+  header.addEventListener('click', async () => {
+    const expanded = icon.classList.toggle('open');
+    matchList.style.display = expanded ? 'block' : 'none';
+    if (expanded && !betslip.loaded) {
+      matchList.innerHTML = '<p>Laden...</p>';
+      try {
+        const matches = await fetchMatches(key);
+        renderMatches(matches, matchList);
+        betslip.loaded = true;
+      } catch {
+        matchList.innerHTML = '<p>Fout bij laden.</p>';
+      }
+    }
+  });
+
+  return div;
+}
+
+async function fetchMatches(key) {
+  const url = `https://api.the-odds-api.com/v4/sports/${key}/odds/?apiKey=${apiKey}&regions=eu&markets=h2h&oddsFormat=decimal`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('API error');
+  return res.json();
+}
+
+function renderMatches(matches, container) {
+  container.innerHTML = '';
+  const filtered = matches.filter(m => isWithinNext7Days(m.commence_time));
+  if (filtered.length === 0) {
+    container.innerHTML = "<p>Geen wedstrijden binnen 7 dagen.</p>";
+    return;
+  }
+
+  filtered.forEach(match => {
+    const outcomes = [...match.bookmakers[0].markets[0].outcomes];
+    const matchDiv = document.createElement('div');
+    matchDiv.className = 'match';
+    matchDiv.innerHTML = `
+      <p><strong>${match.home_team} - ${match.away_team}</strong></p>
+      <p><em>${formatDateTimeToNL(match.commence_time)}</em></p>
+      <div class="odds"></div>
+    `;
+
+    outcomes.forEach(o => {
+      const oddsBtn = document.createElement('button');
+      const adjOdds = Math.max(1.09, o.price * 0.9);
+      oddsBtn.textContent = `${o.name} (${adjOdds.toFixed(2)})`;
+      oddsBtn.addEventListener('click', () => {
+        betslip.push({ match, outcome: o, odds: adjOdds });
+        updateBetslip();
+      });
+      matchDiv.querySelector('.odds').appendChild(oddsBtn);
+    });
+
+    container.appendChild(matchDiv);
+  });
+}
+
+function updateBetslip() {
+  const betsDiv = document.getElementById('bets');
+  betsDiv.innerHTML = '';
+  let totalOdds = 1;
+  betslip.forEach(b => {
+    totalOdds *= b.odds;
+    const p = document.createElement('p');
+    p.textContent = `${b.match.home_team} - ${b.match.away_team}: ${b.outcome.name} (${b.odds.toFixed(2)})`;
     betsDiv.appendChild(p);
   });
-
-  document.getElementById("totalOdds").textContent = totalOdds.toFixed(2);
-  const stake = parseFloat(document.getElementById("stake").value);
-  const potential = stake && stake > 0 ? stake * totalOdds : 0;
-  document.getElementById("potentialPayout").textContent = formatCurrency(potential);
+  document.getElementById('totalOdds').textContent = totalOdds.toFixed(2);
+  const stake = parseFloat(document.getElementById('stake').value) || 0;
+  document.getElementById('potentialPayout').textContent = formatCurrency(stake * totalOdds);
 }
 
-function sendToBot() {
-  const name = document.getElementById("bettorName").value.trim();
-  const stake = parseFloat(document.getElementById("stake").value);
-  const odds = parseFloat(document.getElementById("totalOdds").textContent);
-  const payout = stake * odds;
+async function sendToBot() {
+  const name = document.getElementById('bettorName').value.trim();
+  const stake = parseFloat(document.getElementById('stake').value);
+  const totalOdds = parseFloat(document.getElementById('totalOdds').textContent);
+  const payout = stake * totalOdds;
 
-  if (!name || !name.startsWith("@")) return alert("Gebruik je Discord naam (beginnend met @).");
-  if (betslip.length === 0) return alert("Je hebt geen weddenschappen toegevoegd.");
-  if (!stake || stake < 50000 || stake > 250000) return alert("Inzet moet tussen €50.000 en €250.000 liggen.");
+  if (!name.startsWith('@')) return alert('Voer je Discord naam in, beginnend met @.');
+  if (betslip.length === 0) return alert('Je hebt geen weddenschappen toegevoegd.');
+  if (!stake || stake < 50000 || stake > 250000) return alert('Inzet moet tussen 50K en 250K liggen.');
 
-  let desc = `**Wedder:** ${name}\n**Inzet:** €${formatCurrency(stake)}\n**Totaal Odds:** ${odds.toFixed(2)}\n**Potentiële Uitbetaling:** €${formatCurrency(payout)}\n\n**Weddenschappen:**\n`;
-
-  betslip.forEach(bet => {
-    desc += `- ${bet.match.home_team} vs ${bet.match.away_team}: ${bet.outcome.name} (${bet.odds.toFixed(2)})\n`;
+  let desc = `**Wedder:** ${name}\n**Inzet:** €${formatCurrency(stake)}\n**Totaal Odds:** ${totalOdds.toFixed(2)}\n**Potentiële Uitbetaling:** €${formatCurrency(payout)}\n\n**Weddenschappen:**\n`;
+  betslip.forEach(b => {
+    desc += `- ${b.match.home_team} vs ${b.match.away_team}: ${b.outcome.name} (${b.odds.toFixed(2)})\n`;
   });
 
-  fetch(botWebhookURL, {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      username: name,
-      amount: `€${formatCurrency(stake)}`,
-      description: desc
-    })
-  }).then(res => {
+  const payload = { username: name, amount: `€${formatCurrency(stake)}`, description: desc };
+
+  try {
+    const res = await fetch(botWebhookURL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
     if (res.ok) {
-      alert("Betslip verzonden!");
+      alert('Betslip verzonden!');
       betslip = [];
       updateBetslip();
-      document.getElementById("stake").value = "";
-      document.getElementById("bettorName").value = "";
+      document.getElementById('stake').value = '';
+      document.getElementById('bettorName').value = '';
     } else {
-      alert("Verzenden mislukt.");
+      alert('Fout bij verzenden.');
     }
-  }).catch(() => alert("Fout bij verzenden."));
+  } catch {
+    alert('Fout bij verzenden.');
+  }
 }
 
-document.getElementById("stake").addEventListener("input", updateBetslip);
+document.getElementById('stake').addEventListener('input', updateBetslip);
+
+window.addEventListener('DOMContentLoaded', () => {
+  const container = document.getElementById('matches');
+  Object.entries(leagues).forEach(([name, key]) => {
+    container.appendChild(createLeagueElement(name, key));
+  });
+});
 </script>
 
 </body>
