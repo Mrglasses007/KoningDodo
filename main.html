@@ -105,6 +105,15 @@
   }
   .league-header h2 {
     margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .league-header img.league-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.35);
   }
   .toggle-icon {
     font-size: 20px;
@@ -129,6 +138,15 @@
   .match:hover {
     background-color: rgba(0, 100, 0, 0.95);
     box-shadow: 0 0 10px #007700cc;
+  }
+  .market-title {
+    margin: 8px 0 4px;
+    font-size: 14px;
+    color: #ffcc00;
+  }
+  .odds {
+    display: flex;
+    flex-wrap: wrap;
   }
   .odds button {
     background-color: #ff8c00;
@@ -180,10 +198,10 @@
     <p><strong>Totaal Odds:</strong> <span id="totalOdds">1.00</span></p>
     <p><strong>Potentiële Uitbetaling:</strong> €<span id="potentialPayout">0,00</span></p>
     <p id="payoutWarning"></p>
-    <input type="number" id="stake" placeholder="Inzet (€)" min="50000" />
+    <input type="number" id="stake" placeholder="Inzet (€)" min="75000" />
     <p id="stakeWarning"></p>
     <button id="sendBtn" onclick="sendToDiscord()">Verstuur naar Discord</button>
-    <p class="bet-info">Minimale inzet 50K • Maximale inzet 250K • Maximale uitbetaling 1.75M</p>
+    <p class="bet-info">Minimale inzet 75K • Maximale inzet 350K • Maximale uitbetaling 2.0M</p>
   </div>
 
   <div class="matches" id="matches"></div>
@@ -193,18 +211,48 @@
 const apiKey = "9b7a7c15dd348a78c4feee37ded6e1d0";
 const webhookURL = "https://discord.com/api/webhooks/1404901242307608706/KpY04R63ezeTL6WQCFvtLd1HwlA9_JeR0GhtfpVniqMgsOV6lhLtQMuV3-bHeM1LfxwU";
 
+/** ---------- League icons (SVG badges, geen emoji's) ---------- **/
+function svgBadge(text, bg="#0b3d91") {
+  const svg = `
+  <svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'>
+    <defs>
+      <linearGradient id='g' x1='0' y1='0' x2='0' y2='1'>
+        <stop offset='0%' stop-color='${bg}' stop-opacity='1'/>
+        <stop offset='100%' stop-color='#062b62' stop-opacity='1'/>
+      </linearGradient>
+    </defs>
+    <circle cx='32' cy='32' r='30' fill='url(#g)' stroke='#ff8c00' stroke-width='3'/>
+    <text x='32' y='38' font-family='Arial, Helvetica, sans-serif' font-size='22' fill='#ffffff' text-anchor='middle' font-weight='bold'>${text}</text>
+  </svg>`;
+  return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+}
+function leagueIconSrc(name) {
+  switch(name) {
+    case "Eredivisie": return svgBadge("NL", "#006400");
+    case "Premier League": return svgBadge("PL", "#5c2dc1");
+    case "Champions League": return svgBadge("UCL", "#0b3d91");
+    case "Champions League Kwalificatie": return svgBadge("UCL-Q", "#0b3d91");
+    case "Jupiler Pro League": return svgBadge("BE", "#c8102e");
+    case "MMA / UFC": return svgBadge("UFC", "#d20a0a");
+    default: return svgBadge("KD", "#444");
+  }
+}
+
+/* Leagues inclusief België & MMA/UFC */
 const leagues = {
   "Eredivisie": "soccer_netherlands_eredivisie",
   "Premier League": "soccer_epl",
   "Champions League Kwalificatie": "soccer_uefa_champs_league_qualification",
-  "Champions League": "soccer_uefa_champs_league"
+  "Champions League": "soccer_uefa_champs_league",
+  "Jupiler Pro League": "soccer_belgium_first_div",
+  "MMA / UFC": "mma_mixed_martial_arts"
 };
 
 let betslip = [];
 let loadedLeagues = {};
-const MAX_INZET = 250000;
-const MIN_INZET = 50000;
-const MAX_PAYOUT = 1750000;
+const MAX_INZET = 350000;   // €350K
+const MIN_INZET = 75000;    // €75K
+const MAX_PAYOUT = 2000000; // €2.0M
 const ODDS_ADJUSTMENT = 0.900; // 10% verlaagd
 const MIN_ODDS = 1.09; // minimale odds
 
@@ -241,11 +289,12 @@ function isWithinNext7Days(dateString) {
 }
 
 function createLeagueElement(name, key) {
+  const iconSrc = leagueIconSrc(name);
   const leagueDiv = document.createElement("div");
   leagueDiv.className = "league";
   leagueDiv.innerHTML = `
     <div class="league-header" tabindex="0">
-      <h2>${name}</h2>
+      <h2><img class="league-icon" alt="${name} icon" src="${iconSrc}"/> ${name}</h2>
       <span class="toggle-icon">&#9654;</span>
     </div>
     <div class="match-list" id="list-${key}"></div>
@@ -265,7 +314,7 @@ async function toggleLeague(key, toggleIcon, matchList) {
     matchList.innerHTML = `<p>Laden...</p>`;
     try {
       const matches = await fetchMatches(key);
-      renderMatches(matches, matchList);
+      renderMatches(matches, matchList, key);
       loadedLeagues[key] = true;
     } catch {
       matchList.innerHTML = `<p>Fout bij laden wedstrijden.</p>`;
@@ -273,35 +322,31 @@ async function toggleLeague(key, toggleIcon, matchList) {
   }
 }
 
+/**
+ * Voor voetbal: alleen H2H.
+ * Voor MMA: H2H + Method of Victory (indien beschikbaar).
+ */
 async function fetchMatches(leagueKey) {
-  const url = `https://api.the-odds-api.com/v4/sports/${leagueKey}/odds/?apiKey=${apiKey}&regions=eu&markets=h2h&oddsFormat=decimal`;
+  const isMMA = leagueKey.startsWith("mma_");
+  const markets = isMMA ? "h2h,method_of_victory" : "h2h";
+  const url = `https://api.the-odds-api.com/v4/sports/${leagueKey}/odds/?apiKey=${apiKey}&regions=eu&markets=${encodeURIComponent(markets)}&oddsFormat=decimal`;
   const response = await fetch(url);
   if (!response.ok) throw new Error("API error");
   return await response.json();
 }
 
-function renderMatches(matches, container) {
+function renderMatches(matches, container, leagueKey) {
   container.innerHTML = "";
 
   // Filter wedstrijden op max 7 dagen in de toekomst
   const upcomingMatches = matches.filter(match => isWithinNext7Days(match.commence_time));
 
   upcomingMatches.forEach(match => {
-    const outcomesSorted = [...match.bookmakers[0].markets[0].outcomes].sort((a,b) => {
-      if (a.name === match.home_team) return -1;
-      if (b.name === match.home_team) return 1;
-      return 0;
-    });
+    const isMMA = leagueKey.startsWith("mma_");
+    const home = match.home_team || (isMMA ? (match?.bookmakers?.[0]?.markets?.[0]?.outcomes?.[0]?.name || "Deelnemer A") : "Thuis");
+    const away = match.away_team || (isMMA ? (match?.bookmakers?.[0]?.markets?.[0]?.outcomes?.[1]?.name || "Deelnemer B") : "Uit");
 
     const startTimeNL = formatDateTimeToNL(match.commence_time);
-    let scoreText = "";
-    if (match.scores && match.scores.length > 0) {
-      const scoreObj = match.scores[0];
-      if (scoreObj && scoreObj.score) {
-        scoreText = `<br><strong>Stand:</strong> ${scoreObj.score}`;
-      }
-    }
-
     let minuteText = "";
     const minute = getMatchMinute(match.commence_time);
     if (minute) minuteText = ` <strong>${minute}</strong>`;
@@ -309,18 +354,47 @@ function renderMatches(matches, container) {
     const matchDiv = document.createElement("div");
     matchDiv.className = "match";
     matchDiv.innerHTML = `
-      <p><strong>${match.home_team} - ${match.away_team}</strong></p>
-      <p><em>${startTimeNL}${minuteText}</em>${scoreText}</p>
-      <div class="odds"></div>
+      <p><strong>${home} - ${away}</strong></p>
+      <p><em>${startTimeNL}${minuteText}</em></p>
     `;
 
-    const oddsDiv = matchDiv.querySelector(".odds");
-    outcomesSorted.forEach(outcome => {
-      const adjustedOdds = Math.max(MIN_ODDS, outcome.price * ODDS_ADJUSTMENT);
-      const btn = document.createElement("button");
-      btn.textContent = `${outcome.name} (${adjustedOdds.toFixed(2)})`;
-      btn.addEventListener("click", () => addBet(match, { ...outcome, price: adjustedOdds }));
-      oddsDiv.appendChild(btn);
+    // Markten renderen: eerst h2h, dan method_of_victory (als die bestaat)
+    const markets = match.bookmakers?.[0]?.markets || [];
+    const order = ["h2h", "method_of_victory"];
+    order.forEach(type => {
+      const market = markets.find(m => m.key === type);
+      if (!market || !market.outcomes || !market.outcomes.length) return;
+
+      const title = type === "h2h"
+        ? (isMMA ? "Winnaar (MMA)" : "Winnaar")
+        : "Method of Victory";
+
+      const titleEl = document.createElement("div");
+      titleEl.className = "market-title";
+      titleEl.textContent = title;
+
+      const oddsDiv = document.createElement("div");
+      oddsDiv.className = "odds";
+
+      const outcomes = [...market.outcomes];
+      if (!isMMA && match.home_team) {
+        outcomes.sort((a,b) => {
+          if (a.name === match.home_team) return -1;
+          if (b.name === match.home_team) return 1;
+          return 0;
+        });
+      }
+
+      outcomes.forEach(outcome => {
+        const adjustedOdds = Math.max(MIN_ODDS, (outcome.price || 1) * ODDS_ADJUSTMENT);
+        const btn = document.createElement("button");
+        btn.textContent = `${outcome.name} (${adjustedOdds.toFixed(2)})`;
+        btn.addEventListener("click", () => addBet(match, { ...outcome, price: adjustedOdds, marketKey: type }));
+        oddsDiv.appendChild(btn);
+      });
+
+      matchDiv.appendChild(titleEl);
+      matchDiv.appendChild(oddsDiv);
     });
 
     container.appendChild(matchDiv);
@@ -332,11 +406,12 @@ function renderMatches(matches, container) {
 }
 
 function addBet(match, outcome) {
-  if (betslip.some(b => b.match.id === match.id)) {
-    alert("Je hebt al een weddenschap voor deze wedstrijd geplaatst.");
+  // Uniek per match + markt + outcome (zodat je bij MMA meerdere markten kan combineren)
+  const betId = `${match.id}_${outcome.marketKey || "h2h"}_${outcome.name}`;
+  if (betslip.some(b => b.id === betId)) {
+    alert("Deze selectie staat al in je betslip.");
     return;
   }
-  const betId = `${match.id}_${outcome.name}`;
   betslip.push({ id: betId, match, outcome, odds: outcome.price });
   updateBetslip();
 }
@@ -347,8 +422,13 @@ function updateBetslip() {
   let totalOdds = 1;
   betslip.forEach(bet => {
     totalOdds *= bet.odds;
+    const home = bet.match.home_team || "Deelnemer A";
+    const away = bet.match.away_team || "Deelnemer B";
+    const marketLabel = bet.outcome.marketKey === "method_of_victory" ? "Method of Victory" :
+                        bet.outcome.marketKey === "h2h" ? "Winnaar" : (bet.outcome.marketKey || "Markt");
     const p = document.createElement("p");
-    p.textContent = `${bet.match.home_team} - ${bet.match.away_team}: ${bet.outcome.name} (${bet.odds.toFixed(2)})`;
+    p.textContent = `${home} - ${away} • ${marketLabel}: ${bet.outcome.name} (${bet.odds.toFixed(2)})`;
+
     const removeBtn = document.createElement("button");
     removeBtn.textContent = "Verwijder";
     removeBtn.style.marginLeft = "10px";
@@ -433,7 +513,11 @@ function sendToDiscord() {
   let description = `**Wedder:** ${bettorName}\n**Inzet:** €${formatCurrency(inzet)}\n**Totaal Odds:** ${totalOdds.toFixed(2)}\n**Potentiële Uitbetaling:** ${payoutText}\n\n**Weddenschappen:**\n`;
   betslip.forEach(bet => {
     const matchDate = formatDateTimeToNL(bet.match.commence_time);
-    description += `- ${bet.match.home_team} - ${bet.match.away_team} (${matchDate}): ${bet.outcome.name} (${bet.odds.toFixed(2)})\n`;
+    const home = bet.match.home_team || "Deelnemer A";
+    const away = bet.match.away_team || "Deelnemer B";
+    const marketLabel = bet.outcome.marketKey === "method_of_victory" ? "Method of Victory" :
+                        bet.outcome.marketKey === "h2h" ? "Winnaar" : (bet.outcome.marketKey || "Markt");
+    description += `- ${home} - ${away} (${matchDate}) • ${marketLabel}: ${bet.outcome.name} (${bet.odds.toFixed(2)})\n`;
   });
 
   const payload = {
