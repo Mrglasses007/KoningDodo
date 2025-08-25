@@ -139,11 +139,6 @@
     background-color: rgba(0, 100, 0, 0.95);
     box-shadow: 0 0 10px #007700cc;
   }
-  .market-title {
-    margin: 8px 0 4px;
-    font-size: 14px;
-    color: #ffcc00;
-  }
   .odds {
     display: flex;
     flex-wrap: wrap;
@@ -164,9 +159,7 @@
     transform: scale(1.05);
     box-shadow: 0 0 12px #ff8c00dd;
   }
-  .match p {
-    margin: 5px 0;
-  }
+  .match p { margin: 5px 0; }
   #stakeWarning, #payoutWarning {
     color: red;
     font-weight: bold;
@@ -237,7 +230,6 @@ function leagueIconSrc(name) {
 }
 
 /* --------- Leagues (Premier League verwijderd, UCL samengevoegd) --------- */
-/* Je kunt nu óf een string key opgeven, óf een array met meerdere keys. */
 const leagues = {
   "Eredivisie": "soccer_netherlands_eredivisie",
   "Champions League": ["soccer_uefa_champs_league_qualification", "soccer_uefa_champs_league"], // samengevoegd
@@ -251,7 +243,20 @@ const MAX_INZET = 350000;   // €350K
 const MIN_INZET = 75000;    // €75K
 const MAX_PAYOUT = 2000000; // €2.0M
 const ODDS_ADJUSTMENT = 0.900; // 10% verlaagd
-const MIN_ODDS = 1.09; // minimale odds
+const MIN_FLOOR_LOW = 1.09;
+const MIN_FLOOR_HIGH = 1.12;
+
+function randomMinFloor() {
+  // Random tussen 1.09 en 1.12, afronden op 2 decimalen
+  const val = MIN_FLOOR_LOW + Math.random() * (MIN_FLOOR_HIGH - MIN_FLOOR_LOW);
+  return Math.round(val * 100) / 100;
+}
+function adjustedOdds(price) {
+  let adj = (price || 1) * ODDS_ADJUSTMENT;
+  const floor = randomMinFloor();
+  if (adj < floor) adj = floor;
+  return adj;
+}
 
 function formatDateTimeToNL(utcDate) {
   const date = new Date(utcDate);
@@ -287,7 +292,6 @@ function isWithinNext7Days(dateString) {
 
 function createLeagueElement(name, key) {
   const iconSrc = leagueIconSrc(name);
-  // Unieke ID (ook wanneer key een array is)
   const listId = "list-" + (Array.isArray(key) ? key.join("_") : key).replace(/[^a-zA-Z0-9_]/g, "_");
 
   const leagueDiv = document.createElement("div");
@@ -327,8 +331,8 @@ async function toggleLeague(key, toggleIcon, matchList) {
 
 /**
  * Fetch logic
- * - Ondersteunt een enkele key (string) of meerdere keys (array) en voegt resultaten samen.
- * - We gebruiken overal alleen H2H (Winnaar) voor stabiliteit (voorkomt 422 bij MMA).
+ * - Ondersteunt één key (string) of meerdere keys (array) en voegt resultaten samen.
+ * - We gebruiken overal alleen H2H (Winnaar) voor stabiliteit.
  */
 async function fetchMatches(leagueKeyOrKeys) {
   const keys = Array.isArray(leagueKeyOrKeys) ? leagueKeyOrKeys : [leagueKeyOrKeys];
@@ -341,7 +345,6 @@ async function fetchMatches(leagueKeyOrKeys) {
   });
 
   const resultsArrays = await Promise.all(requests);
-  // Flatten + eenvoudige dedup op id
   const combined = [].concat(...resultsArrays);
   const seen = new Set();
   const deduped = combined.filter(m => {
@@ -349,8 +352,6 @@ async function fetchMatches(leagueKeyOrKeys) {
     seen.add(m.id);
     return true;
   });
-
-  // Sorteer op starttijd
   deduped.sort((a, b) => new Date(a.commence_time) - new Date(b.commence_time));
   return deduped;
 }
@@ -358,9 +359,7 @@ async function fetchMatches(leagueKeyOrKeys) {
 function renderMatches(matches, container, isMMA) {
   container.innerHTML = "";
 
-  // Filter op max 7 dagen vooruit
   const upcomingMatches = (matches || []).filter(m => isWithinNext7Days(m.commence_time));
-
   if (!upcomingMatches.length) {
     container.innerHTML = "<p>Geen wedstrijden/gevechten in de komende 7 dagen.</p>";
     return;
@@ -384,7 +383,6 @@ function renderMatches(matches, container, isMMA) {
     matchDiv.innerHTML = `
       <p><strong>${home} - ${away}</strong></p>
       <p><em>${startTimeNL}${minuteText}</em></p>
-      <div class="market-title">${isMMA ? "Winnaar (MMA)" : "Winnaar"}</div>
       <div class="odds"></div>
     `;
 
@@ -398,10 +396,10 @@ function renderMatches(matches, container, isMMA) {
 
     const oddsDiv = matchDiv.querySelector(".odds");
     sortedOutcomes.forEach(outcome => {
-      const adjustedOdds = Math.max(MIN_ODDS, (outcome.price || 1) * ODDS_ADJUSTMENT);
+      const adj = adjustedOdds(outcome.price);
       const btn = document.createElement("button");
-      btn.textContent = `${outcome.name} (${adjustedOdds.toFixed(2)})`;
-      btn.addEventListener("click", () => addBet(match, { ...outcome, price: adjustedOdds, marketKey: "h2h" }));
+      btn.textContent = `${outcome.name} (${adj.toFixed(2)})`;
+      btn.addEventListener("click", () => addBet(match, { ...outcome, price: adj, marketKey: "h2h" }));
       oddsDiv.appendChild(btn);
     });
 
