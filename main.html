@@ -229,21 +229,18 @@ function svgBadge(text, bg="#0b3d91") {
 function leagueIconSrc(name) {
   switch(name) {
     case "Eredivisie": return svgBadge("NL", "#006400");
-    case "Premier League": return svgBadge("PL", "#5c2dc1");
-    case "Champions League": return svgBadge("UCL", "#0b3d91");
-    case "Champions League Kwalificatie": return svgBadge("UCL-Q", "#0b3d91");
+    case "Champions League": return svgBadge("UCL", "#0b3d91"); // bevat ook kwalificatie
     case "Jupiler Pro League": return svgBadge("BE", "#c8102e");
     case "MMA / UFC": return svgBadge("UFC", "#d20a0a");
     default: return svgBadge("KD", "#444");
   }
 }
 
-/* Leagues inclusief België & MMA/UFC */
+/* --------- Leagues (Premier League verwijderd, UCL samengevoegd) --------- */
+/* Je kunt nu óf een string key opgeven, óf een array met meerdere keys. */
 const leagues = {
   "Eredivisie": "soccer_netherlands_eredivisie",
-  "Premier League": "soccer_epl",
-  "Champions League Kwalificatie": "soccer_uefa_champs_league_qualification",
-  "Champions League": "soccer_uefa_champs_league",
+  "Champions League": ["soccer_uefa_champs_league_qualification", "soccer_uefa_champs_league"], // samengevoegd
   "Jupiler Pro League": "soccer_belgium_first_div",
   "MMA / UFC": "mma_mixed_martial_arts"
 };
@@ -290,6 +287,9 @@ function isWithinNext7Days(dateString) {
 
 function createLeagueElement(name, key) {
   const iconSrc = leagueIconSrc(name);
+  // Unieke ID (ook wanneer key een array is)
+  const listId = "list-" + (Array.isArray(key) ? key.join("_") : key).replace(/[^a-zA-Z0-9_]/g, "_");
+
   const leagueDiv = document.createElement("div");
   leagueDiv.className = "league";
   leagueDiv.innerHTML = `
@@ -297,7 +297,7 @@ function createLeagueElement(name, key) {
       <h2><img class="league-icon" alt="${name} icon" src="${iconSrc}"/> ${name}</h2>
       <span class="toggle-icon">&#9654;</span>
     </div>
-    <div class="match-list" id="list-${key}"></div>
+    <div class="match-list" id="${listId}"></div>
   `;
   const header = leagueDiv.querySelector(".league-header");
   const toggleIcon = leagueDiv.querySelector(".toggle-icon");
@@ -310,12 +310,14 @@ function createLeagueElement(name, key) {
 async function toggleLeague(key, toggleIcon, matchList) {
   const expanded = toggleIcon.classList.toggle("open");
   matchList.style.display = expanded ? "block" : "none";
-  if (expanded && !loadedLeagues[key]) {
+  const keyId = Array.isArray(key) ? key.join("_") : key;
+  if (expanded && !loadedLeagues[keyId]) {
     matchList.innerHTML = `<p>Laden...</p>`;
     try {
       const matches = await fetchMatches(key);
-      renderMatches(matches, matchList, key);
-      loadedLeagues[key] = true;
+      const isMMA = (Array.isArray(key) ? key : [key]).some(k => String(k).startsWith("mma_"));
+      renderMatches(matches, matchList, isMMA);
+      loadedLeagues[keyId] = true;
     } catch (e) {
       console.error(e);
       matchList.innerHTML = `<p>Fout bij laden wedstrijden.</p>`;
@@ -324,43 +326,52 @@ async function toggleLeague(key, toggleIcon, matchList) {
 }
 
 /**
- * ——— Fetch logic ———
- * Alles in H2H. Specifiek voor MMA (mma_mixed_martial_arts) gebruiken we
- * ook alleen H2H om 422 te voorkomen.
+ * Fetch logic
+ * - Ondersteunt een enkele key (string) of meerdere keys (array) en voegt resultaten samen.
+ * - We gebruiken overal alleen H2H (Winnaar) voor stabiliteit (voorkomt 422 bij MMA).
  */
-async function fetchMatches(leagueKey) {
-  const url = `https://api.the-odds-api.com/v4/sports/${leagueKey}/odds/?apiKey=${apiKey}&regions=eu&markets=h2h&oddsFormat=decimal`;
-  const response = await fetch(url);
-  if (!response.ok) {
-    // 422 of andere fout => gooi duidelijke error
-    throw new Error(`API error ${response.status}`);
-  }
-  return await response.json();
+async function fetchMatches(leagueKeyOrKeys) {
+  const keys = Array.isArray(leagueKeyOrKeys) ? leagueKeyOrKeys : [leagueKeyOrKeys];
+  const requests = keys.map(key => {
+    const url = `https://api.the-odds-api.com/v4/sports/${key}/odds/?apiKey=${apiKey}&regions=eu&markets=h2h&oddsFormat=decimal`;
+    return fetch(url).then(res => {
+      if (!res.ok) throw new Error(`API error ${res.status} for ${key}`);
+      return res.json();
+    });
+  });
+
+  const resultsArrays = await Promise.all(requests);
+  // Flatten + eenvoudige dedup op id
+  const combined = [].concat(...resultsArrays);
+  const seen = new Set();
+  const deduped = combined.filter(m => {
+    if (seen.has(m.id)) return false;
+    seen.add(m.id);
+    return true;
+  });
+
+  // Sorteer op starttijd
+  deduped.sort((a, b) => new Date(a.commence_time) - new Date(b.commence_time));
+  return deduped;
 }
 
-function renderMatches(matches, container, leagueKey) {
+function renderMatches(matches, container, isMMA) {
   container.innerHTML = "";
 
   // Filter op max 7 dagen vooruit
   const upcomingMatches = (matches || []).filter(m => isWithinNext7Days(m.commence_time));
 
-  // Als er niks is:
   if (!upcomingMatches.length) {
     container.innerHTML = "<p>Geen wedstrijden/gevechten in de komende 7 dagen.</p>";
     return;
   }
 
   upcomingMatches.forEach(match => {
-    const isMMA = leagueKey.startsWith("mma_");
-
-    // Pak veilig de eerste bookmaker + h2h market
     const bookmaker = match.bookmakers?.[0];
     const market = bookmaker?.markets?.find(m => m.key === "h2h") || bookmaker?.markets?.[0];
     const outcomes = market?.outcomes || [];
+    if (!outcomes.length) return;
 
-    if (!outcomes.length) return; // niets te tonen
-
-    // Labeling voor display
     const home = match.home_team || (isMMA ? (outcomes?.[0]?.name || "Deelnemer A") : "Thuis");
     const away = match.away_team || (isMMA ? (outcomes?.[1]?.name || "Deelnemer B") : "Uit");
 
@@ -377,7 +388,6 @@ function renderMatches(matches, container, leagueKey) {
       <div class="odds"></div>
     `;
 
-    // Voor voetbal sorteren we Home eerst; voor MMA laten we de volgorde staan
     const sortedOutcomes = isMMA || !match.home_team
       ? [...outcomes]
       : [...outcomes].sort((a, b) => {
@@ -400,7 +410,6 @@ function renderMatches(matches, container, leagueKey) {
 }
 
 function addBet(match, outcome) {
-  // Uniek per match + outcome
   const betId = `${match.id}_h2h_${outcome.name}`;
   if (betslip.some(b => b.id === betId)) {
     alert("Deze selectie staat al in je betslip.");
