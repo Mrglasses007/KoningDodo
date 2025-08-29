@@ -9,9 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      /* Brand first: oranje + groen */
-      --accent: #ff8c00;
-      --mint: #24d17e;
+      --accent: #ff8c00; /* Oranje */
+      --mint: #24d17e;   /* Groen  */
       --bg1: #04110d; --bg2: #021a1a;
       --glass: rgba(0, 25, 15, 0.55);
       --glass-strong: rgba(0, 40, 20, 0.65);
@@ -33,8 +32,8 @@
       overflow-x: hidden;
     }
 
-    /* Same cinematic BG as index */
-    .bg{position:fixed; inset:0; z-index:-3; background:url('https://i.imgur.com/y9tD43R.jpeg') center/cover no-repeat fixed; filter:contrast(1.05) saturate(1.1) brightness(.7);}
+    /* Cinematic BG matching index */
+    .bg{position:fixed; inset:0; z-index:-3; background:url('https://i.imgur.com/y9tD43R.jpeg') center/cover no-repeat fixed; filter:contrast(1.05) saturate(1.1) brightness(.72);}  
     .bg::after{content:""; position:absolute; inset:0; background:radial-gradient(1000px 600px at 50% 20%, transparent 0%, rgba(0,0,0,.45) 70%), linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,.6));}
     .sheen{position:fixed; inset:-20%; z-index:-2; pointer-events:none; mix-blend-mode:soft-light; opacity:.6; background:conic-gradient(from 0deg,#0a3822,transparent 30%,#092a3a 60%,transparent 85%); animation:spin 50s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg)}}
@@ -46,34 +45,17 @@
       backdrop-filter: blur(6px);
       border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
     }
-    .nav {
-      max-width: 1200px; margin: 0 auto; padding: 14px 20px;
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-    }
+    .nav { max-width: 1200px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text); }
     .brand img { height: 64px; filter: drop-shadow(0 6px 12px rgba(0,0,0,.5)); }
     .brand-title { font-family: Orbitron, Inter, sans-serif; letter-spacing: .06em; font-weight: 800; font-size: clamp(18px, 4vw, 26px); }
     .badge { font-size: 12px; padding: 6px 10px; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--mint)); color: #00150a; font-weight: 800; box-shadow: var(--shadow); }
 
-    main { max-width: 1200px; margin: 16px auto 60px; padding: 0 20px;
-      display: grid; grid-template-columns: 1fr 360px; gap: 22px; align-items: start; }
+    main { max-width: 1200px; margin: 16px auto 60px; padding: 0 20px; display: grid; grid-template-columns: 1fr 360px; gap: 22px; align-items: start; }
 
     /* Betslip */
-    .betslip {
-      position: sticky; top: 16px; align-self: start; width: 100%;
-      background: linear-gradient(180deg, var(--glass-strong), rgba(0,0,0,.25));
-      border-radius: var(--radius-lg);
-      border: 1px solid color-mix(in srgb, var(--mint) 35%, transparent);
-      box-shadow: var(--shadow);
-      padding: 16px 16px 18px; isolation: isolate;
-    }
-    .betslip::before {
-      content:""; position:absolute; inset: -1px; border-radius: inherit; pointer-events:none;
-      background: conic-gradient(from 180deg,
-                 color-mix(in srgb, var(--accent) 60%, transparent),
-                 transparent 20%, color-mix(in srgb, var(--mint) 55%, transparent) 55%, transparent 80%);
-      filter: blur(12px); opacity: .35; z-index:-1;
-    }
+    .betslip { position: sticky; top: 16px; align-self: start; width: 100%; background: linear-gradient(180deg, var(--glass-strong), rgba(0,0,0,.25)); border-radius: var(--radius-lg); border: 1px solid color-mix(in srgb, var(--mint) 35%, transparent); box-shadow: var(--shadow); padding: 16px 16px 18px; isolation: isolate; }
+    .betslip::before { content:""; position:absolute; inset: -1px; border-radius: inherit; pointer-events:none; background: conic-gradient(from 180deg, color-mix(in srgb, var(--accent) 60%, transparent), transparent 20%, color-mix(in srgb, var(--mint) 55%, transparent) 55%, transparent 80%); filter: blur(12px); opacity: .35; z-index:-1; }
     .betslip h2 { margin: 0 0 6px; font-size: 20px; letter-spacing:.02em; color: var(--muted); }
     .field { display:flex; flex-direction:column; gap:6px; margin: 10px 0 8px; }
     .input, .btn, .pill { width: 100%; border: 0; border-radius: 12px; padding: 12px 14px; font-size: 15px; }
@@ -82,11 +64,7 @@
     .row { display:flex; align-items:center; justify-content:space-between; gap: 10px; }
     .muted { color: #d5ffef; opacity: .85; font-size: 13px; }
     .stat { font-weight: 800; }
-    .btn {
-      background: linear-gradient(90deg, var(--accent), var(--mint)); color: #00150a; font-weight: 900;
-      cursor: pointer; transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
-      box-shadow: 0 8px 20px rgba(255, 140, 0, .25);
-    }
+    .btn { background: linear-gradient(90deg, var(--accent), var(--mint)); color: #00150a; font-weight: 900; cursor: pointer; transition: transform .15s ease, box-shadow .2s ease, filter .2s ease; box-shadow: 0 8px 20px rgba(255, 140, 0, .25); }
     .btn:disabled { opacity: .55; cursor:not-allowed; filter: grayscale(.4); }
     .btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(255, 140, 0, .35); }
 
@@ -96,10 +74,9 @@
     #stakeWarning, #payoutWarning { color: #ff4343; font-weight: 800; display:none; }
     .bet-info { margin-top: 12px; font-size: 12px; color: #ffe6b5; text-align:center; opacity:.9; }
 
-    /* Matches list */
+    /* Matches */
     .matches { min-height: 70vh; }
-    .league { background: linear-gradient(180deg, var(--glass), rgba(0,0,0,.2)); border-radius: var(--radius-lg);
-      border: 1px solid color-mix(in srgb, var(--mint) 25%, transparent); padding: 10px; box-shadow: var(--shadow); margin-bottom: 18px; }
+    .league { background: linear-gradient(180deg, var(--glass), rgba(0,0,0,.2)); border-radius: var(--radius-lg); border: 1px solid color-mix(in srgb, var(--mint) 25%, transparent); padding: 10px; box-shadow: var(--shadow); margin-bottom: 18px; }
     .league-header { display:flex; align-items:center; justify-content:space-between; gap: 10px; cursor:pointer; user-select:none; padding: 6px 8px; border-radius: 12px; }
     .league-header:focus-visible { outline: none; box-shadow: var(--ring); }
     .league-title { display:flex; align-items:center; gap: 10px; }
@@ -118,21 +95,19 @@
     .meta { font-size: 12px; opacity:.9; color: var(--muted); margin: 4px 0 8px; }
 
     .odds { display:flex; flex-wrap: wrap; gap: 6px; }
-    .odds .pick {
-      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03)); border:1px solid rgba(255,255,255,.1);
-      padding: 6px 10px; border-radius: 10px; font-weight: 800; color: #fff; cursor: pointer; transition: transform .12s ease, box-shadow .2s ease, background .2s ease;
-    }
+    .odds .pick { background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03)); border:1px solid rgba(255,255,255,.1); padding: 6px 10px; border-radius: 10px; font-weight: 800; color: #fff; cursor: pointer; transition: transform .12s ease, box-shadow .2s ease, background .2s ease; }
     .odds .pick:hover { transform: translateY(-1px) scale(1.02); box-shadow: 0 6px 18px rgba(0,0,0,.25); }
 
-    /* Mobile betslip: bottom sheet */
     .fab { position: fixed; right: 16px; bottom: 16px; z-index: 70; display:none; }
     .fab button { border:0; border-radius: 999px; padding: 14px 18px; font-weight: 900; box-shadow: 0 12px 24px rgba(0,0,0,.35); background: linear-gradient(90deg, var(--accent), var(--mint)); color: #00150a; cursor:pointer; }
+
     @media (max-width: 980px) {
       main { grid-template-columns: 1fr; }
       .betslip { position: fixed; left: 0; right: 0; bottom: 0; top: auto; border-radius: 18px 18px 0 0; transform: translateY(66%); transition: transform .35s ease; z-index: 60; }
       .betslip.open { transform: translateY(0%); }
       .fab { display:block; }
     }
+
     @media (prefers-reduced-motion: reduce) {
       .match:hover { transform:none; }
       .btn, .odds .pick { transition: none; }
@@ -156,6 +131,7 @@
 
   <main>
     <section class="matches" id="matches" aria-live="polite"></section>
+
     <aside class="betslip" id="betslip" aria-label="Betslip">
       <h2>Jouw Betslip</h2>
       <div class="field">
@@ -187,20 +163,36 @@
   <div class="fab"><button id="toggleSlip">Betslip</button></div>
 
   <script>
-    // ⚠️ Client-side keys zichtbaar. Overweeg Vercel functions + ENV secrets.
+    // Client-side keys zichtbaar. Overweeg Vercel functions + ENV secrets.
     const apiKey = "e7f774dc1fd8d38f2e66f1ae6128ac47";
     const webhookURL = "https://discord.com/api/webhooks/1404901242307608706/KpY04R63ezeTL6WQCFvtLd1HwlA9_JeR0GhtfpVniqMgsOV6lhLtQMuV3-bHeM1LfxwU";
 
-    // Brand SVG badges
+    // Audio: ping + subtiele whoosh
+    let AC; function getAC(){ AC = AC || new (window.AudioContext||window.webkitAudioContext)(); return AC; }
+    function coinPing(v=0.22, dur=0.12, type='triangle', f=920){
+      const ac = getAC(); const o = ac.createOscillator(); const g = ac.createGain();
+      o.type = type; o.frequency.value = f; o.connect(g); g.connect(ac.destination);
+      const t = ac.currentTime; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      o.start(t); o.stop(t + dur + 0.02);
+    }
+    function whoosh(vol=0.06, dur=0.18, f1=600, f2=1200){
+      const ac = getAC(); const t = ac.currentTime;
+      const bufferSize = Math.max(1, Math.floor(ac.sampleRate * dur));
+      const buf = ac.createBuffer(1, bufferSize, ac.sampleRate);
+      const data = buf.getChannelData(0);
+      for(let i=0;i<bufferSize;i++){ const fade = 1 - i / bufferSize; data[i] = (Math.random()*2-1) * fade; }
+      const src = ac.createBufferSource(); src.buffer = buf;
+      const bp = ac.createBiquadFilter(); bp.type='bandpass'; bp.frequency.setValueAtTime(f1, t); bp.frequency.linearRampToValueAtTime(f2, t+dur);
+      const g = ac.createGain(); g.gain.value = vol;
+      src.connect(bp); bp.connect(g); g.connect(ac.destination);
+      src.start(t); src.stop(t+dur+0.02);
+    }
+
+    // League icons
     function svgBadge(text, bg="#0b3d91") {
       const svg = `
       <svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'>
-        <defs>
-          <linearGradient id='g' x1='0' y1='0' x2='0' y2='1'>
-            <stop offset='0%' stop-color='${bg}' stop-opacity='1'/>
-            <stop offset='100%' stop-color='#062b62' stop-opacity='1'/>
-          </linearGradient>
-        </defs>
+        <defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='${bg}'/><stop offset='100%' stop-color='#062b62'/></linearGradient></defs>
         <circle cx='32' cy='32' r='30' fill='url(#g)' stroke='#ff8c00' stroke-width='3'/>
         <text x='32' y='38' font-family='Arial, Helvetica, sans-serif' font-size='22' fill='#ffffff' text-anchor='middle' font-weight='bold'>${text}</text>
       </svg>`;
@@ -216,7 +208,6 @@
       }
     }
 
-    // Leagues
     const leagues = {
       "Eredivisie": "soccer_netherlands_eredivisie",
       "Champions League": ["soccer_uefa_champs_league_qualification", "soccer_uefa_champs_league"],
@@ -226,56 +217,15 @@
 
     let betslip = [];
     let loadedLeagues = {};
-    const MAX_INZET = 350000;   // €350K
-    const MIN_INZET = 75000;    // €75K
-    const MAX_PAYOUT = 2000000; // €2.0M
-    const ODDS_ADJUSTMENT = 0.900; // 10% verlaagd
-    const MIN_FLOOR_LOW = 1.09;
-    const MIN_FLOOR_HIGH = 1.12;
+    const MAX_INZET = 350000, MIN_INZET = 75000, MAX_PAYOUT = 2000000, ODDS_ADJUSTMENT = 0.900;
+    const MIN_FLOOR_LOW = 1.09, MIN_FLOOR_HIGH = 1.12;
 
-    // AudioContext + coin ping
-    let AC; function getAC(){ AC = AC || new (window.AudioContext||window.webkitAudioContext)(); return AC; }
-    function coinPing(v=0.22, dur=0.12, type='triangle', f=920){
-      const ac = getAC(); const o = ac.createOscillator(); const g = ac.createGain();
-      o.type = type; o.frequency.value = f; o.connect(g); g.connect(ac.destination);
-      const t = ac.currentTime; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
-      o.start(t); o.stop(t + dur + 0.02);
-    }
-
-    function randomMinFloor() {
-      const val = MIN_FLOOR_LOW + Math.random() * (MIN_FLOOR_HIGH - MIN_FLOOR_LOW);
-      return Math.round(val * 100) / 100;
-    }
-    function adjustedOdds(price) {
-      let adj = (price || 1) * ODDS_ADJUSTMENT;
-      const floor = randomMinFloor();
-      if (adj < floor) adj = floor;
-      return adj;
-    }
-    function formatDateTimeToNL(utcDate) {
-      const date = new Date(utcDate);
-      return date.toLocaleString('nl-NL', {
-        timeZone: 'Europe/Amsterdam',
-        day: '2-digit', month: '2-digit', year: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-      });
-    }
-    function formatCurrency(amount) {
-      return amount.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-    function getMatchMinute(startTime) {
-      const start = new Date(startTime);
-      const now = new Date();
-      const diffMinutes = Math.floor((now - start) / 60000);
-      if (diffMinutes >= 0 && diffMinutes <= 120) { return `${diffMinutes}'`; }
-      return null;
-    }
-    function isWithinNext7Days(dateString) {
-      const matchDate = new Date(dateString);
-      const now = new Date();
-      const sevenDaysLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-      return matchDate >= now && matchDate <= sevenDaysLater;
-    }
+    function randomMinFloor(){ const val = MIN_FLOOR_LOW + Math.random() * (MIN_FLOOR_HIGH - MIN_FLOOR_LOW); return Math.round(val * 100) / 100; }
+    function adjustedOdds(price){ let adj = (price || 1) * ODDS_ADJUSTMENT; const floor = randomMinFloor(); if (adj < floor) adj = floor; return adj; }
+    function formatDateTimeToNL(utcDate){ const date = new Date(utcDate); return date.toLocaleString('nl-NL', { timeZone: 'Europe/Amsterdam', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+    function formatCurrency(amount){ return amount.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    function getMatchMinute(startTime){ const start = new Date(startTime); const now = new Date(); const diffMinutes = Math.floor((now - start) / 60000); if (diffMinutes >= 0 && diffMinutes <= 120) { return `${diffMinutes}'`; } return null; }
+    function isWithinNext7Days(dateString){ const matchDate = new Date(dateString); const now = new Date(); const sevenDaysLater = new Date(now.getTime() + 7*24*60*60*1000); return matchDate >= now && matchDate <= sevenDaysLater; }
 
     function createLeagueElement(name, key) {
       const listId = "list-" + (Array.isArray(key) ? key.join("_") : key).replace(/[^a-zA-Z0-9_]/g, "_");
@@ -295,7 +245,7 @@
       const toggleIcon = wrap.querySelector('.toggle-icon');
       const matchList = wrap.querySelector('.match-list');
 
-      header.addEventListener('click', () => toggleLeague(key, toggleIcon, matchList, header));
+      header.addEventListener('click', () => { whoosh(0.05,0.18,650,1100); toggleLeague(key, toggleIcon, matchList, header); });
       header.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); header.click(); } });
       return wrap;
     }
@@ -344,7 +294,7 @@
     function renderMatches(matches, container, isMMA) {
       container.innerHTML = "";
       const upcoming = (matches || []).filter(m => isWithinNext7Days(m.commence_time));
-      if (!upcoming.length) { container.innerHTML = "<p class='muted' style='padding:10px 6px;'>Geen wedstrijden/gevechten in de komende 7 dagen.</p>"; return; }
+      if (!upcoming.length) { container.innerHTML = "<p class=\"muted\" style=\"padding:10px 6px;\">Geen wedstrijden/gevechten in de komende 7 dagen.</p>"; return; }
 
       upcoming.forEach(match => {
         const bookmaker = match.bookmakers?.[0];
@@ -360,21 +310,15 @@
         const el = document.createElement('div');
         el.className = 'match';
         el.innerHTML = `
-          <div class="title">
-            <p style="margin:0;font-weight:800;">${home} - ${away}</p>
-            ${minute ? `<span class="live"><span class="dot"></span>${minute}</span>` : ''}
+          <div class=\"title\">
+            <p style=\"margin:0;font-weight:800;\">${home} - ${away}</p>
+            ${minute ? `<span class=\"live\"><span class=\"dot\"></span>${minute}</span>` : ''}
           </div>
-          <p class="meta"><em>${startTimeNL}</em></p>
-          <div class="odds"></div>
+          <p class=\"meta\"><em>${startTimeNL}</em></p>
+          <div class=\"odds\"></div>
         `;
 
-        const sortedOutcomes = isMMA || !match.home_team
-          ? [...outcomes]
-          : [...outcomes].sort((a, b) => {
-              if (a.name === match.home_team) return -1;
-              if (b.name === match.home_team) return 1;
-              return 0;
-            });
+        const sortedOutcomes = isMMA || !match.home_team ? [...outcomes] : [...outcomes].sort((a, b) => { if (a.name === match.home_team) return -1; if (b.name === match.home_team) return 1; return 0; });
 
         const oddsDiv = el.querySelector('.odds');
         sortedOutcomes.forEach(outcome => {
@@ -382,20 +326,14 @@
           const btn = document.createElement('button');
           btn.className = 'pick';
           btn.textContent = `${outcome.name} (${adj.toFixed(2)})`;
-          btn.addEventListener('click', (ev) => {
-            addBet(match, { ...outcome, price: adj, marketKey: 'h2h' });
-            ripple(ev);
-            coinPing(0.18,0.08,'sine',1080);
-          });
+          btn.addEventListener('click', (ev) => { addBet(match, { ...outcome, price: adj, marketKey: 'h2h' }); ripple(ev); coinPing(0.18,0.08,'sine',1080); });
           oddsDiv.appendChild(btn);
         });
 
         container.appendChild(el);
       });
 
-      requestAnimationFrame(() => {
-        const parent = container; parent.style.maxHeight = parent.scrollHeight + 'px';
-      });
+      requestAnimationFrame(() => { const parent = container; parent.style.maxHeight = parent.scrollHeight + 'px'; });
     }
 
     function addBet(match, outcome) {
@@ -496,8 +434,8 @@
         .then(res => {
           if (res.ok) {
             toast('Weddenschap verstuurd naar Discord!');
-            coinPing(0.3,0.12,'triangle',980); // 🔊 coin ping bij succes
-            party(); // confetti
+            coinPing(0.3,0.12,'triangle',980); // ping bij succes
+            party(); // confetti effect
             betslip = [];
             updateBetslip();
             document.getElementById('bettorName').value = '';
@@ -507,7 +445,7 @@
         .catch(() => toast('Er is een fout opgetreden bij het versturen.'));
     }
 
-    // ---------- UI sugar: ripple, toast, confetti, particles, bottom-sheet toggle ----------
+    // Ripple, toast, confetti, particles, bottom-sheet toggle
     function ripple(ev) {
       const btn = ev.currentTarget;
       const r = document.createElement('span');
@@ -535,69 +473,32 @@
       clearTimeout(toastEl._t); toastEl._t = setTimeout(() => { toastEl.style.opacity = '0'; }, 1800);
     }
 
-    // Particles + Confetti on shared canvas
     const canvas = document.getElementById('fxCanvas');
     const ctx = canvas.getContext('2d');
     let dpr = Math.max(1, window.devicePixelRatio || 1);
-    let W, H;
-    let particles = [];
-    let confetti = [];
-    let motionOK = matchMedia('(prefers-reduced-motion: no-preference)').matches;
+    let W, H; let particles = []; let confetti = []; let motionOK = matchMedia('(prefers-reduced-motion: no-preference)').matches;
 
-    function resize() {
-      W = canvas.width = Math.floor(innerWidth * dpr);
-      H = canvas.height = Math.floor(innerHeight * dpr);
-      canvas.style.width = innerWidth + 'px';
-      canvas.style.height = innerHeight + 'px';
-    }
+    function resize() { W = canvas.width = Math.floor(innerWidth * dpr); H = canvas.height = Math.floor(innerHeight * dpr); canvas.style.width = innerWidth + 'px'; canvas.style.height = innerHeight + 'px'; }
     window.addEventListener('resize', resize); resize();
 
-    function spawnParticles(n=70) {
-      particles.length = 0;
-      for (let i=0;i<n;i++) {
-        particles.push({ x: Math.random()*W, y: Math.random()*H, r: (Math.random()*2+0.5)*dpr, vx: (Math.random()-.5)*0.25*dpr, vy: (Math.random()*0.2+0.05)*dpr, a: Math.random()*0.6+0.15 });
-      }
-    }
-    function party() { // confetti burst
-      for (let i=0;i<140;i++) {
-        const angle = Math.random()*Math.PI*2;
-        const speed = (Math.random()*2+1) * dpr;
-        confetti.push({ x: W/2, y: H*0.7, w: (Math.random()*3+1)*dpr, h: (Math.random()*8+3)*dpr, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed - 2*dpr, life: 120+Math.random()*60, hue: Math.random()*360 });
-      }
-    }
+    function spawnParticles(n=70) { particles.length = 0; for (let i=0;i<n;i++) { particles.push({ x: Math.random()*W, y: Math.random()*H, r: (Math.random()*2+0.5)*dpr, vx: (Math.random()-.5)*0.25*dpr, vy: (Math.random()*0.2+0.05)*dpr, a: Math.random()*0.6+0.15 }); } }
+    function party() { for (let i=0;i<140;i++) { const angle = Math.random()*Math.PI*2; const speed = (Math.random()*2+1) * dpr; confetti.push({ x: W/2, y: H*0.7, w: (Math.random()*3+1)*dpr, h: (Math.random()*8+3)*dpr, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed - 2*dpr, life: 120+Math.random()*60, hue: Math.random()*360 }); } }
     function tick() {
       ctx.clearRect(0,0,W,H);
-      // particles
       ctx.globalAlpha = 0.6;
-      particles.forEach(p => {
-        p.x += p.vx; p.y += p.vy; if (p.y > H) { p.y = -10; p.x = Math.random()*W; }
-        if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-        ctx.fillStyle = 'rgba(36, 209, 126, 0.35)'; ctx.fill();
-      });
+      particles.forEach(p => { p.x += p.vx; p.y += p.vy; if (p.y > H) { p.y = -10; p.x = Math.random()*W; } if (p.x < 0) p.x = W; if (p.x > W) p.x = 0; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fillStyle = 'rgba(36, 209, 126, 0.35)'; ctx.fill(); });
       ctx.globalAlpha = 1;
-      // confetti
-      confetti.forEach((c, i) => {
-        c.x += c.vx; c.y += c.vy; c.vy += 0.02*dpr; c.life -= 1; if (c.life <= 0) confetti[i] = null;
-        ctx.save(); ctx.translate(c.x, c.y); ctx.rotate((120-c.life)/12); ctx.fillStyle = `hsl(${c.hue} 90% 60% / .9)`; ctx.fillRect(-c.w/2, -c.h/2, c.w, c.h); ctx.restore();
-      });
+      confetti.forEach((c, i) => { c.x += c.vx; c.y += c.vy; c.vy += 0.02*dpr; c.life -= 1; if (c.life <= 0) confetti[i] = null; ctx.save(); ctx.translate(c.x, c.y); ctx.rotate((120-c.life)/12); ctx.fillStyle = `hsl(${c.hue} 90% 60% / .9)`; ctx.fillRect(-c.w/2, -c.h/2, c.w, c.h); ctx.restore(); });
       confetti = confetti.filter(Boolean);
       requestAnimationFrame(tick);
     }
     if (motionOK) { spawnParticles(); tick(); }
 
-    // Bottom sheet toggle for betslip on mobile
     const betslipEl = document.getElementById('betslip');
     const toggleSlipBtn = document.getElementById('toggleSlip');
     toggleSlipBtn?.addEventListener('click', () => betslipEl.classList.toggle('open'));
 
-    // Initial load
-    (async function loadAllLeagues() {
-      const matchesContainer = document.getElementById('matches');
-      for (const [name, key] of Object.entries(leagues)) {
-        matchesContainer.appendChild(createLeagueElement(name, key));
-      }
-    })();
+    (async function loadAllLeagues() { const matchesContainer = document.getElementById('matches'); for (const [name, key] of Object.entries(leagues)) { matchesContainer.appendChild(createLeagueElement(name, key)); } })();
   </script>
 </body>
 </html>
