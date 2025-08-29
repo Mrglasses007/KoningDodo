@@ -1,552 +1,616 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8" />
-<title>Koning Dodo</title>
-<style>
-  body, html {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-  }
-  body {
-    font-family: Arial, sans-serif;
-    color: #fff;
-    background: url('https://i.imgur.com/y9tD43R.jpeg') no-repeat center center fixed;
-    background-size: cover;
-    position: relative;
-  }
-  body::before {
-    content: "";
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(0, 0, 0, 0.6);
-    pointer-events: none;
-    z-index: -1;
-  }
-  header {
-    background-color: #006400cc;
-    padding: 15px;
-    text-align: center;
-    border-bottom: 5px solid #ff8c00;
-    position: sticky;
-    top: 0;
-    z-index: 20;
-  }
-  header img {
-    height: 80px;
-  }
-  main {
-    max-width: 1100px;
-    margin: 20px auto 40px;
-    display: flex;
-    gap: 20px;
-    padding: 0 20px;
-    min-height: 80vh;
-    position: relative;
-  }
-  .betslip {
-    background-color: #004d00dd;
-    padding: 15px;
-    border-radius: 10px;
-    width: 350px;
-    color: #fff;
-    box-shadow: 0 0 6px 2px rgba(255, 140, 0, 0.5);
-    position: sticky;
-    top: 20px;
-    align-self: flex-start;
-  }
-  .betslip h2 {
-    color: #ff8c00;
-  }
-  .betslip input, .betslip button {
-    width: 90%;
-    max-width: 300px;
-    padding: 10px;
-    margin-top: 10px;
-    border-radius: 5px;
-    border: none;
-    font-size: 16px;
-  }
-  .betslip button {
-    background-color: #ff8c00;
-    color: #fff;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  .betslip button:hover:enabled {
-    background-color: #e07b00;
-    transform: scale(1.05);
-    box-shadow: 0 0 12px #ff8c00dd;
-  }
-  .betslip button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  .matches {
-    flex: 1;
-    max-width: 700px;
-    overflow-wrap: break-word;
-  }
-  .league {
-    background-color: #006400dd;
-    padding: 10px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    box-shadow: 0 0 6px 2px rgba(255, 140, 0, 0.5);
-  }
-  .league-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    user-select: none;
-  }
-  .league-header h2 {
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .league-header img.league-icon {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.35);
-  }
-  .toggle-icon {
-    font-size: 20px;
-    transition: transform 0.3s ease;
-  }
-  .toggle-icon.open {
-    transform: rotate(90deg);
-  }
-  .match-list {
-    margin-top: 10px;
-    display: none;
-  }
-  .match {
-    background-color: #004d00cc;
-    padding: 10px;
-    border-radius: 5px;
-    margin: 5px 0;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    cursor: pointer;
-    animation: fadeIn 0.5s ease forwards;
-  }
-  .match:hover {
-    background-color: rgba(0, 100, 0, 0.95);
-    box-shadow: 0 0 10px #007700cc;
-  }
-  .odds {
-    display: flex;
-    flex-wrap: wrap;
-  }
-  .odds button {
-    background-color: #ff8c00;
-    border: none;
-    padding: 5px 10px;
-    color: #fff;
-    margin: 0 5px 5px 0;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  .odds button:hover {
-    background-color: #e07b00;
-    transform: scale(1.05);
-    box-shadow: 0 0 12px #ff8c00dd;
-  }
-  .match p { margin: 5px 0; }
-  #stakeWarning, #payoutWarning {
-    color: red;
-    font-weight: bold;
-    display: none;
-  }
-  .bet-info {
-    margin-top: 15px;
-    font-size: 14px;
-    color: #ffcc00;
-    text-align: center;
-  }
-  @keyframes fadeIn {
-    from {opacity: 0; transform: translateY(10px);}
-    to {opacity: 1; transform: translateY(0);}
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Koning Dodo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg1: #030b0f;
+      --bg2: #021b1b;
+      --glass: rgba(0, 20, 10, 0.45);
+      --glass-strong: rgba(0, 40, 20, 0.65);
+      --stroke: #24d17e;
+      --accent: #ff8c00;
+      --accent-2: #00ffd0;
+      --text: #f2fff7;
+      --muted: #c7f1df;
+      --card: rgba(0, 60, 30, 0.6);
+      --card-hover: rgba(0, 90, 40, 0.8);
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --radius-lg: 22px;
+      --ring: 0 0 0 2px color-mix(in srgb, var(--accent) 70%, transparent);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 800px at 10% 10%, #062d1d44 0%, transparent 60%),
+                  radial-gradient(1200px 800px at 90% 10%, #0a2a5a33 0%, transparent 60%),
+                  linear-gradient(120deg, var(--bg1), var(--bg2));
+      overflow-x: hidden;
+    }
+
+    /* Animated gradient sheen */
+    .animated-bg {
+      position: fixed; inset: 0; pointer-events: none; z-index: -1;
+      background: conic-gradient(from 0deg, #0a3822, transparent 30%, #092a3a 60%, transparent 85%);
+      mix-blend-mode: soft-light; opacity: .6;
+      animation: spin 40s linear infinite;
+    }
+    @media (prefers-reduced-motion: reduce) { .animated-bg { animation: none; } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Particles canvas */
+    #fxCanvas { position: fixed; inset: 0; z-index: -2; display:block; }
+
+    header {
+      position: sticky; top: 0; z-index: 50;
+      background: linear-gradient(0deg, transparent, rgba(0,0,0,.5));
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+    }
+    .nav {
+      max-width: 1200px; margin: 0 auto; padding: 14px 20px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text); }
+    .brand img { height: 64px; filter: drop-shadow(0 6px 12px rgba(0,0,0,.5)); }
+    .brand-title { font-family: Orbitron, Inter, sans-serif; letter-spacing: .06em; font-weight: 800; font-size: clamp(18px, 4vw, 26px); }
+    .badge { font-size: 12px; padding: 6px 10px; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: #00150a; font-weight: 800; box-shadow: var(--shadow); }
+
+    main { max-width: 1200px; margin: 16px auto 60px; padding: 0 20px;
+      display: grid; grid-template-columns: 1fr 360px; gap: 22px; align-items: start; }
+
+    /* Betslip */
+    .betslip {
+      position: sticky; top: 16px; align-self: start; width: 100%;
+      background: linear-gradient(180deg, var(--glass-strong), rgba(0,0,0,.25));
+      border-radius: var(--radius-lg);
+      border: 1px solid color-mix(in srgb, var(--stroke) 35%, transparent);
+      box-shadow: var(--shadow);
+      padding: 16px 16px 18px;
+      isolation: isolate;
+    }
+    .betslip::before {
+      content:""; position:absolute; inset: -1px; border-radius: inherit; pointer-events:none;
+      background: conic-gradient(from 180deg,
+                 color-mix(in srgb, var(--accent) 60%, transparent),
+                 transparent 20%, color-mix(in srgb, var(--accent-2) 55%, transparent) 55%, transparent 80%);
+      filter: blur(12px); opacity: .35; z-index:-1;
+    }
+    .betslip h2 { margin: 0 0 6px; font-size: 20px; letter-spacing:.02em; color: var(--muted); }
+    .field { display:flex; flex-direction:column; gap:6px; margin: 10px 0 8px; }
+    .input, .btn, .pill { width: 100%; border: 0; border-radius: 12px; padding: 12px 14px; font-size: 15px; }
+    .input { background: rgba(255,255,255,.07); color: var(--text); outline: none; box-shadow: inset 0 0 0 1px rgba(255,255,255,.07); }
+    .input:focus { box-shadow: inset 0 0 0 2px var(--accent), 0 0 0 4px rgba(255,140,0,.15); }
+    .row { display:flex; align-items:center; justify-content:space-between; gap: 10px; }
+    .muted { color: #d5ffef; opacity: .8; font-size: 13px; }
+    .stat { font-weight: 800; }
+    .btn {
+      background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: #00150a; font-weight: 900;
+      cursor: pointer; transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
+      box-shadow: 0 8px 20px rgba(255, 140, 0, .25);
+    }
+    .btn:disabled { opacity: .55; cursor:not-allowed; filter: grayscale(.4); }
+    .btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(255, 140, 0, .35); }
+
+    #bets p { margin: 8px 0; background: rgba(0,0,0,.25); padding: 8px 10px; border-radius: 10px; }
+    .remove {
+      margin-left: 8px; background:#900; color:#fff; padding: 4px 8px; border-radius: 8px; font-size: 12px; border:0; cursor:pointer; opacity:.9;
+    }
+    .remove:hover { opacity:1; filter:brightness(1.05); }
+    #stakeWarning, #payoutWarning { color: #ff4343; font-weight: 800; display:none; }
+    .bet-info { margin-top: 12px; font-size: 12px; color: #ffe6b5; text-align:center; opacity:.9; }
+
+    /* Matches list */
+    .matches { min-height: 70vh; }
+
+    .league { background: linear-gradient(180deg, var(--glass), rgba(0,0,0,.2)); border-radius: var(--radius-lg);
+      border: 1px solid color-mix(in srgb, var(--stroke) 25%, transparent); padding: 10px; box-shadow: var(--shadow); margin-bottom: 18px; }
+    .league-header { display:flex; align-items:center; justify-content:space-between; gap: 10px; cursor:pointer; user-select:none; padding: 6px 8px; border-radius: 12px; }
+    .league-header:focus-visible { outline: none; box-shadow: var(--ring); }
+    .league-title { display:flex; align-items:center; gap: 10px; }
+    .league-icon { width:28px; height:28px; border-radius: 50%; box-shadow: 0 0 0 2px rgba(255, 140, 0, .35); }
+    .toggle-icon { font-size: 20px; transition: transform .25s ease; color: var(--muted); }
+    .toggle-icon.open { transform: rotate(90deg); color: var(--accent-2); }
+
+    .match-list { overflow: hidden; max-height: 0; opacity: 0; transition: max-height .35s ease, opacity .35s ease; padding: 0 6px; }
+    .match-list.open { opacity: 1; }
+
+    .match { background: var(--card); border-radius: 14px; padding: 10px; margin: 8px 0; transition: transform .12s ease, background .25s ease, box-shadow .25s ease; cursor: pointer; position: relative; }
+    .match:hover { transform: translateY(-1px); background: var(--card-hover); box-shadow: 0 10px 26px rgba(0,0,0,.25); }
+
+    .match .title { display:flex; align-items:center; justify-content:space-between; gap: 12px; }
+    .live { display:flex; align-items:center; gap:6px; font-weight: 800; color:#ff7171; }
+    .dot { width:8px; height:8px; border-radius:50%; background:#ff4343; box-shadow: 0 0 10px #ff4343; animation: blink 1s ease-in-out infinite; }
+    @keyframes blink { 50% { opacity:.4; filter:brightness(.7); } }
+
+    .meta { font-size: 12px; opacity:.9; color: var(--muted); margin: 4px 0 8px; }
+    .odds { display:flex; flex-wrap: wrap; gap: 6px; }
+    .odds .pick {
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03)); border:1px solid rgba(255,255,255,.1);
+      padding: 6px 10px; border-radius: 10px; font-weight: 800; color: #fff; cursor: pointer; transition: transform .12s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .odds .pick:hover { transform: translateY(-1px) scale(1.02); box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+
+    /* Mobile betslip: bottom sheet */
+    .fab { position: fixed; right: 16px; bottom: 16px; z-index: 70; display:none; }
+    .fab button { border:0; border-radius: 999px; padding: 14px 18px; font-weight: 900; box-shadow: 0 12px 24px rgba(0,0,0,.35); background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: #00150a; cursor:pointer; }
+
+    @media (max-width: 980px) {
+      main { grid-template-columns: 1fr; }
+      .betslip { position: fixed; left: 0; right: 0; bottom: 0; top: auto; border-radius: 18px 18px 0 0; transform: translateY(66%); transition: transform .35s ease; z-index: 60; }
+      .betslip.open { transform: translateY(0%); }
+      .fab { display:block; }
+    }
+
+    /* Accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      .match:hover { transform:none; }
+      .btn, .odds .pick { transition: none; }
+    }
+  </style>
 </head>
 <body>
+  <canvas id="fxCanvas" aria-hidden="true"></canvas>
+  <div class="animated-bg" aria-hidden="true"></div>
 
-<header>
-  <img src="https://i.imgur.com/YpEK9A2.png" alt="Koning Dodo logo" />
-</header>
-
-<main>
-  <div class="betslip" id="betslip">
-    <h2>Jouw Betslip</h2>
-    <input type="text" id="bettorName" placeholder="Discord naam (@...)" required />
-    <div id="bets"></div>
-    <p><strong>Totaal Odds:</strong> <span id="totalOdds">1.00</span></p>
-    <p><strong>Potentiële Uitbetaling:</strong> €<span id="potentialPayout">0,00</span></p>
-    <p id="payoutWarning"></p>
-    <input type="number" id="stake" placeholder="Inzet (€)" min="75000" />
-    <p id="stakeWarning"></p>
-    <button id="sendBtn" onclick="sendToDiscord()">Verstuur naar Discord</button>
-    <p class="bet-info">Minimale inzet 75K • Maximale inzet 350K • Maximale uitbetaling 2.0M</p>
-  </div>
-
-  <div class="matches" id="matches"></div>
-</main>
-
-<script>
-const apiKey = "e7f774dc1fd8d38f2e66f1ae6128ac47";
-const webhookURL = "https://discord.com/api/webhooks/1404901242307608706/KpY04R63ezeTL6WQCFvtLd1HwlA9_JeR0GhtfpVniqMgsOV6lhLtQMuV3-bHeM1LfxwU";
-
-/** ---------- League icons (SVG badges, geen emoji's) ---------- **/
-function svgBadge(text, bg="#0b3d91") {
-  const svg = `
-  <svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'>
-    <defs>
-      <linearGradient id='g' x1='0' y1='0' x2='0' y2='1'>
-        <stop offset='0%' stop-color='${bg}' stop-opacity='1'/>
-        <stop offset='100%' stop-color='#062b62' stop-opacity='1'/>
-      </linearGradient>
-    </defs>
-    <circle cx='32' cy='32' r='30' fill='url(#g)' stroke='#ff8c00' stroke-width='3'/>
-    <text x='32' y='38' font-family='Arial, Helvetica, sans-serif' font-size='22' fill='#ffffff' text-anchor='middle' font-weight='bold'>${text}</text>
-  </svg>`;
-  return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
-}
-function leagueIconSrc(name) {
-  switch(name) {
-    case "Eredivisie": return svgBadge("NL", "#006400");
-    case "Champions League": return svgBadge("UCL", "#0b3d91"); // bevat ook kwalificatie
-    case "Jupiler Pro League": return svgBadge("BE", "#c8102e");
-    case "MMA / UFC": return svgBadge("UFC", "#d20a0a");
-    default: return svgBadge("KD", "#444");
-  }
-}
-
-/* --------- Leagues (Premier League verwijderd, UCL samengevoegd) --------- */
-const leagues = {
-  "Eredivisie": "soccer_netherlands_eredivisie",
-  "Champions League": ["soccer_uefa_champs_league_qualification", "soccer_uefa_champs_league"], // samengevoegd
-  "Jupiler Pro League": "soccer_belgium_first_div",
-  "MMA / UFC": "mma_mixed_martial_arts"
-};
-
-let betslip = [];
-let loadedLeagues = {};
-const MAX_INZET = 350000;   // €350K
-const MIN_INZET = 75000;    // €75K
-const MAX_PAYOUT = 2000000; // €2.0M
-const ODDS_ADJUSTMENT = 0.900; // 10% verlaagd
-const MIN_FLOOR_LOW = 1.09;
-const MIN_FLOOR_HIGH = 1.12;
-
-function randomMinFloor() {
-  // Random tussen 1.09 en 1.12, afronden op 2 decimalen
-  const val = MIN_FLOOR_LOW + Math.random() * (MIN_FLOOR_HIGH - MIN_FLOOR_LOW);
-  return Math.round(val * 100) / 100;
-}
-function adjustedOdds(price) {
-  let adj = (price || 1) * ODDS_ADJUSTMENT;
-  const floor = randomMinFloor();
-  if (adj < floor) adj = floor;
-  return adj;
-}
-
-function formatDateTimeToNL(utcDate) {
-  const date = new Date(utcDate);
-  return date.toLocaleString('nl-NL', {
-    timeZone: 'Europe/Amsterdam',
-    day: '2-digit', month: '2-digit', year: 'numeric',
-    hour: '2-digit', minute: '2-digit'
-  });
-}
-
-function formatCurrency(amount) {
-  return amount.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-function getMatchMinute(startTime) {
-  const start = new Date(startTime);
-  const now = new Date();
-  const diffMinutes = Math.floor((now - start) / 60000);
-  if (diffMinutes >= 0 && diffMinutes <= 120) {
-    return `${diffMinutes}'`;
-  }
-  return null;
-}
-
-// Helper: check of match binnen 7 dagen is
-function isWithinNext7Days(dateString) {
-  const matchDate = new Date(dateString);
-  const now = new Date();
-  const sevenDaysLater = new Date();
-  sevenDaysLater.setDate(now.getDate() + 7);
-  return matchDate >= now && matchDate <= sevenDaysLater;
-}
-
-function createLeagueElement(name, key) {
-  const iconSrc = leagueIconSrc(name);
-  const listId = "list-" + (Array.isArray(key) ? key.join("_") : key).replace(/[^a-zA-Z0-9_]/g, "_");
-
-  const leagueDiv = document.createElement("div");
-  leagueDiv.className = "league";
-  leagueDiv.innerHTML = `
-    <div class="league-header" tabindex="0">
-      <h2><img class="league-icon" alt="${name} icon" src="${iconSrc}"/> ${name}</h2>
-      <span class="toggle-icon">&#9654;</span>
+  <header>
+    <div class="nav">
+      <a class="brand" href="#" aria-label="Koning Dodo">
+        <img src="https://i.imgur.com/YpEK9A2.png" alt="Koning Dodo logo" />
+        <div class="brand-title">KONING DODO <span class="badge">Roleplay WEDKANTOOR</span></div>
+      </a>
     </div>
-    <div class="match-list" id="${listId}"></div>
-  `;
-  const header = leagueDiv.querySelector(".league-header");
-  const toggleIcon = leagueDiv.querySelector(".toggle-icon");
-  const matchList = leagueDiv.querySelector(".match-list");
+  </header>
 
-  header.addEventListener("click", () => toggleLeague(key, toggleIcon, matchList));
-  return leagueDiv;
-}
+  <main>
+    <section class="matches" id="matches" aria-live="polite"></section>
 
-async function toggleLeague(key, toggleIcon, matchList) {
-  const expanded = toggleIcon.classList.toggle("open");
-  matchList.style.display = expanded ? "block" : "none";
-  const keyId = Array.isArray(key) ? key.join("_") : key;
-  if (expanded && !loadedLeagues[keyId]) {
-    matchList.innerHTML = `<p>Laden...</p>`;
-    try {
-      const matches = await fetchMatches(key);
-      const isMMA = (Array.isArray(key) ? key : [key]).some(k => String(k).startsWith("mma_"));
-      renderMatches(matches, matchList, isMMA);
-      loadedLeagues[keyId] = true;
-    } catch (e) {
-      console.error(e);
-      matchList.innerHTML = `<p>Fout bij laden wedstrijden.</p>`;
+    <aside class="betslip" id="betslip" aria-label="Betslip">
+      <h2>Jouw Betslip</h2>
+      <div class="field">
+        <label for="bettorName" class="muted">Discord naam</label>
+        <input class="input" type="text" id="bettorName" placeholder="@jouw-naam" required />
+      </div>
+      <div id="bets"></div>
+      <div class="row" style="margin-top:8px;">
+        <span class="muted">Totaal Odds:</span>
+        <span class="stat" id="totalOdds">1.00</span>
+      </div>
+      <div class="row">
+        <span class="muted">Potentiële Uitbetaling:</span>
+        <span class="stat">€<span id="potentialPayout">0,00</span></span>
+      </div>
+      <p id="payoutWarning"></p>
+
+      <div class="field">
+        <label for="stake" class="muted">Inzet (€)</label>
+        <input class="input" type="number" id="stake" placeholder="75000 – 350000" min="75000" />
+        <span id="stakeWarning"></span>
+      </div>
+
+      <button class="btn" id="sendBtn" onclick="sendToDiscord()">Verstuur naar Discord</button>
+      <p class="bet-info">Minimale inzet 75K • Maximale inzet 350K • Maximale uitbetaling 2.0M</p>
+    </aside>
+  </main>
+
+  <div class="fab"><button id="toggleSlip">Betslip</button></div>
+
+  <script>
+    // ⚠️ Let op: je API key en Discord webhook staan client-side en zijn publiek zichtbaar in de browser.
+    // Overweeg om dit via een Vercel serverless function te proxien en gevoelige waarden in ENV vars te zetten.
+
+    const apiKey = "e7f774dc1fd8d38f2e66f1ae6128ac47";
+    const webhookURL = "https://discord.com/api/webhooks/1404901242307608706/KpY04R63ezeTL6WQCFvtLd1HwlA9_JeR0GhtfpVniqMgsOV6lhLtQMuV3-bHeM1LfxwU";
+
+    /** ---------- League icons (SVG badges, geen emoji's) ---------- **/
+    function svgBadge(text, bg = "#0b3d91") {
+      const svg = `
+        <svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'>
+          <defs>
+            <linearGradient id='g' x1='0' y1='0' x2='0' y2='1'>
+              <stop offset='0%' stop-color='${bg}' stop-opacity='1'/>
+              <stop offset='100%' stop-color='#062b62' stop-opacity='1'/>
+            </linearGradient>
+          </defs>
+          <circle cx='32' cy='32' r='30' fill='url(#g)' stroke='#ff8c00' stroke-width='3'/>
+          <text x='32' y='38' font-family='Arial, Helvetica, sans-serif' font-size='22' fill='#ffffff' text-anchor='middle' font-weight='bold'>${text}</text>
+        </svg>`;
+      return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
     }
-  }
-}
+    function leagueIconSrc(name) {
+      switch (name) {
+        case "Eredivisie": return svgBadge("NL", "#006400");
+        case "Champions League": return svgBadge("UCL", "#0b3d91");
+        case "Jupiler Pro League": return svgBadge("BE", "#c8102e");
+        case "MMA / UFC": return svgBadge("UFC", "#d20a0a");
+        default: return svgBadge("KD", "#444");
+      }
+    }
 
-/**
- * Fetch logic
- * - Ondersteunt één key (string) of meerdere keys (array) en voegt resultaten samen.
- * - We gebruiken overal alleen H2H (Winnaar) voor stabiliteit.
- */
-async function fetchMatches(leagueKeyOrKeys) {
-  const keys = Array.isArray(leagueKeyOrKeys) ? leagueKeyOrKeys : [leagueKeyOrKeys];
-  const requests = keys.map(key => {
-    const url = `https://api.the-odds-api.com/v4/sports/${key}/odds/?apiKey=${apiKey}&regions=eu&markets=h2h&oddsFormat=decimal`;
-    return fetch(url).then(res => {
-      if (!res.ok) throw new Error(`API error ${res.status} for ${key}`);
-      return res.json();
-    });
-  });
+    /* --------- Leagues --------- */
+    const leagues = {
+      "Eredivisie": "soccer_netherlands_eredivisie",
+      "Champions League": ["soccer_uefa_champs_league_qualification", "soccer_uefa_champs_league"],
+      "Jupiler Pro League": "soccer_belgium_first_div",
+      "MMA / UFC": "mma_mixed_martial_arts"
+    };
 
-  const resultsArrays = await Promise.all(requests);
-  const combined = [].concat(...resultsArrays);
-  const seen = new Set();
-  const deduped = combined.filter(m => {
-    if (seen.has(m.id)) return false;
-    seen.add(m.id);
-    return true;
-  });
-  deduped.sort((a, b) => new Date(a.commence_time) - new Date(b.commence_time));
-  return deduped;
-}
+    let betslip = [];
+    let loadedLeagues = {};
+    const MAX_INZET = 350000;   // €350K
+    const MIN_INZET = 75000;    // €75K
+    const MAX_PAYOUT = 2000000; // €2.0M
+    const ODDS_ADJUSTMENT = 0.900; // 10% verlaagd
+    const MIN_FLOOR_LOW = 1.09;
+    const MIN_FLOOR_HIGH = 1.12;
 
-function renderMatches(matches, container, isMMA) {
-  container.innerHTML = "";
+    function randomMinFloor() {
+      const val = MIN_FLOOR_LOW + Math.random() * (MIN_FLOOR_HIGH - MIN_FLOOR_LOW);
+      return Math.round(val * 100) / 100;
+    }
+    function adjustedOdds(price) {
+      let adj = (price || 1) * ODDS_ADJUSTMENT;
+      const floor = randomMinFloor();
+      if (adj < floor) adj = floor;
+      return adj;
+    }
 
-  const upcomingMatches = (matches || []).filter(m => isWithinNext7Days(m.commence_time));
-  if (!upcomingMatches.length) {
-    container.innerHTML = "<p>Geen wedstrijden/gevechten in de komende 7 dagen.</p>";
-    return;
-  }
+    function formatDateTimeToNL(utcDate) {
+      const date = new Date(utcDate);
+      return date.toLocaleString('nl-NL', {
+        timeZone: 'Europe/Amsterdam',
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+    }
+    function formatCurrency(amount) {
+      return amount.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    function getMatchMinute(startTime) {
+      const start = new Date(startTime);
+      const now = new Date();
+      const diffMinutes = Math.floor((now - start) / 60000);
+      if (diffMinutes >= 0 && diffMinutes <= 120) { return `${diffMinutes}'`; }
+      return null;
+    }
+    function isWithinNext7Days(dateString) {
+      const matchDate = new Date(dateString);
+      const now = new Date();
+      const sevenDaysLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+      return matchDate >= now && matchDate <= sevenDaysLater;
+    }
 
-  upcomingMatches.forEach(match => {
-    const bookmaker = match.bookmakers?.[0];
-    const market = bookmaker?.markets?.find(m => m.key === "h2h") || bookmaker?.markets?.[0];
-    const outcomes = market?.outcomes || [];
-    if (!outcomes.length) return;
+    function createLeagueElement(name, key) {
+      const listId = "list-" + (Array.isArray(key) ? key.join("_") : key).replace(/[^a-zA-Z0-9_]/g, "_");
+      const wrap = document.createElement("div");
+      wrap.className = "league";
+      wrap.innerHTML = `
+        <div class="league-header" tabindex="0" role="button" aria-expanded="false" aria-controls="${listId}">
+          <div class="league-title">
+            <img class="league-icon" alt="${name} icon" src="${leagueIconSrc(name)}"/>
+            <h2 style="margin:0;font-size:18px;">${name}</h2>
+          </div>
+          <span class="toggle-icon" aria-hidden="true">▶</span>
+        </div>
+        <div class="match-list" id="${listId}"></div>
+      `;
+      const header = wrap.querySelector('.league-header');
+      const toggleIcon = wrap.querySelector('.toggle-icon');
+      const matchList = wrap.querySelector('.match-list');
 
-    const home = match.home_team || (isMMA ? (outcomes?.[0]?.name || "Deelnemer A") : "Thuis");
-    const away = match.away_team || (isMMA ? (outcomes?.[1]?.name || "Deelnemer B") : "Uit");
+      header.addEventListener('click', () => toggleLeague(key, toggleIcon, matchList, header));
+      header.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); header.click(); } });
+      return wrap;
+    }
 
-    const startTimeNL = formatDateTimeToNL(match.commence_time);
-    const minute = getMatchMinute(match.commence_time);
-    const minuteText = minute ? ` <strong>${minute}</strong>` : "";
+    async function toggleLeague(key, toggleIcon, matchList, headerEl) {
+      const expanded = !toggleIcon.classList.contains('open');
+      toggleIcon.classList.toggle('open', expanded);
+      headerEl.setAttribute('aria-expanded', String(expanded));
 
-    const matchDiv = document.createElement("div");
-    matchDiv.className = "match";
-    matchDiv.innerHTML = `
-      <p><strong>${home} - ${away}</strong></p>
-      <p><em>${startTimeNL}${minuteText}</em></p>
-      <div class="odds"></div>
-    `;
+      if (expanded) {
+        const keyId = Array.isArray(key) ? key.join('_') : key;
+        if (!loadedLeagues[keyId]) {
+          matchList.innerHTML = `<p class="muted" style="padding:10px 6px;">Laden...</p>`;
+          try {
+            const matches = await fetchMatches(key);
+            const isMMA = (Array.isArray(key) ? key : [key]).some(k => String(k).startsWith('mma_'));
+            renderMatches(matches, matchList, isMMA);
+            loadedLeagues[keyId] = true;
+          } catch (e) {
+            console.error(e);
+            matchList.innerHTML = `<p style="color:#ff7171;padding:10px 6px;">Fout bij laden wedstrijden.</p>`;
+          }
+        }
+        // open with smooth height
+        matchList.classList.add('open');
+        matchList.style.maxHeight = matchList.scrollHeight + 'px';
+      } else {
+        matchList.style.maxHeight = '0px';
+        matchList.classList.remove('open');
+      }
+    }
 
-    const sortedOutcomes = isMMA || !match.home_team
-      ? [...outcomes]
-      : [...outcomes].sort((a, b) => {
-          if (a.name === match.home_team) return -1;
-          if (b.name === match.home_team) return 1;
-          return 0;
+    async function fetchMatches(leagueKeyOrKeys) {
+      const keys = Array.isArray(leagueKeyOrKeys) ? leagueKeyOrKeys : [leagueKeyOrKeys];
+      const requests = keys.map(key => {
+        const url = `https://api.the-odds-api.com/v4/sports/${key}/odds/?apiKey=${apiKey}&regions=eu&markets=h2h&oddsFormat=decimal`;
+        return fetch(url).then(res => { if (!res.ok) throw new Error(`API error ${res.status} for ${key}`); return res.json(); });
+      });
+      const resultsArrays = await Promise.all(requests);
+      const combined = [].concat(...resultsArrays);
+      const seen = new Set();
+      const deduped = combined.filter(m => { if (seen.has(m.id)) return false; seen.add(m.id); return true; });
+      deduped.sort((a, b) => new Date(a.commence_time) - new Date(b.commence_time));
+      return deduped;
+    }
+
+    function renderMatches(matches, container, isMMA) {
+      container.innerHTML = "";
+      const upcoming = (matches || []).filter(m => isWithinNext7Days(m.commence_time));
+      if (!upcoming.length) { container.innerHTML = "<p class=\"muted\" style=\"padding:10px 6px;\">Geen wedstrijden/gevechten in de komende 7 dagen.</p>"; return; }
+
+      upcoming.forEach(match => {
+        const bookmaker = match.bookmakers?.[0];
+        const market = bookmaker?.markets?.find(m => m.key === 'h2h') || bookmaker?.markets?.[0];
+        const outcomes = market?.outcomes || [];
+        if (!outcomes.length) return;
+
+        const home = match.home_team || (isMMA ? (outcomes?.[0]?.name || 'Deelnemer A') : 'Thuis');
+        const away = match.away_team || (isMMA ? (outcomes?.[1]?.name || 'Deelnemer B') : 'Uit');
+        const startTimeNL = formatDateTimeToNL(match.commence_time);
+        const minute = getMatchMinute(match.commence_time);
+
+        const el = document.createElement('div');
+        el.className = 'match';
+        el.innerHTML = `
+          <div class="title">
+            <p style="margin:0;font-weight:800;">${home} - ${away}</p>
+            ${minute ? `<span class=\"live\"><span class=\"dot\"></span>${minute}</span>` : ''}
+          </div>
+          <p class="meta"><em>${startTimeNL}</em></p>
+          <div class="odds"></div>
+        `;
+
+        const sortedOutcomes = isMMA || !match.home_team
+          ? [...outcomes]
+          : [...outcomes].sort((a, b) => {
+              if (a.name === match.home_team) return -1;
+              if (b.name === match.home_team) return 1;
+              return 0;
+            });
+
+        const oddsDiv = el.querySelector('.odds');
+        sortedOutcomes.forEach(outcome => {
+          const adj = adjustedOdds(outcome.price);
+          const btn = document.createElement('button');
+          btn.className = 'pick';
+          btn.textContent = `${outcome.name} (${adj.toFixed(2)})`;
+          btn.addEventListener('click', (ev) => {
+            addBet(match, { ...outcome, price: adj, marketKey: 'h2h' });
+            ripple(ev);
+          });
+          oddsDiv.appendChild(btn);
         });
 
-    const oddsDiv = matchDiv.querySelector(".odds");
-    sortedOutcomes.forEach(outcome => {
-      const adj = adjustedOdds(outcome.price);
-      const btn = document.createElement("button");
-      btn.textContent = `${outcome.name} (${adj.toFixed(2)})`;
-      btn.addEventListener("click", () => addBet(match, { ...outcome, price: adj, marketKey: "h2h" }));
-      oddsDiv.appendChild(btn);
-    });
+        container.appendChild(el);
+      });
 
-    container.appendChild(matchDiv);
-  });
-}
-
-function addBet(match, outcome) {
-  const betId = `${match.id}_h2h_${outcome.name}`;
-  if (betslip.some(b => b.id === betId)) {
-    alert("Deze selectie staat al in je betslip.");
-    return;
-  }
-  betslip.push({ id: betId, match, outcome, odds: outcome.price });
-  updateBetslip();
-}
-
-function updateBetslip() {
-  const betsDiv = document.getElementById("bets");
-  betsDiv.innerHTML = "";
-  let totalOdds = 1;
-  betslip.forEach(bet => {
-    totalOdds *= bet.odds;
-    const home = bet.match.home_team || "Deelnemer A";
-    const away = bet.match.away_team || "Deelnemer B";
-    const p = document.createElement("p");
-    p.textContent = `${home} - ${away} • Winnaar: ${bet.outcome.name} (${bet.odds.toFixed(2)})`;
-
-    const removeBtn = document.createElement("button");
-    removeBtn.textContent = "Verwijder";
-    removeBtn.style.marginLeft = "10px";
-    removeBtn.style.backgroundColor = "#900";
-    removeBtn.style.color = "#fff";
-    removeBtn.style.padding = "2px 6px";
-    removeBtn.style.borderRadius = "4px";
-    removeBtn.style.fontSize = "12px";
-    removeBtn.style.cursor = "pointer";
-    removeBtn.addEventListener("click", () => {
-      betslip = betslip.filter(b => b.id !== bet.id);
-      updateBetslip();
-    });
-    p.appendChild(removeBtn);
-    betsDiv.appendChild(p);
-  });
-
-  document.getElementById("totalOdds").textContent = totalOdds.toFixed(2);
-  const inzet = parseFloat(document.getElementById("stake").value);
-  const potential = inzet && inzet > 0 ? inzet * totalOdds : 0;
-
-  const stakeInput = document.getElementById("stake");
-  const stakeWarning = document.getElementById("stakeWarning");
-  const payoutElem = document.getElementById("potentialPayout");
-  const payoutWarning = document.getElementById("payoutWarning");
-  const sendBtn = document.getElementById("sendBtn");
-
-  stakeWarning.style.display = "none";
-  payoutWarning.style.display = "none";
-  stakeInput.style.border = "";
-  payoutElem.style.color = "";
-
-  let valid = true;
-
-  if (!inzet || inzet < MIN_INZET) {
-    stakeInput.style.border = "2px solid red";
-    stakeWarning.textContent = `Minimale inzet is €${formatCurrency(MIN_INZET)}.`;
-    stakeWarning.style.display = "block";
-    valid = false;
-  }
-
-  if (inzet > MAX_INZET) {
-    stakeInput.style.border = "2px solid red";
-    stakeWarning.textContent = `Maximale inzet is €${formatCurrency(MAX_INZET)}.`;
-    stakeWarning.style.display = "block";
-    valid = false;
-  }
-
-  if (potential > MAX_PAYOUT && inzet > 0) {
-    payoutElem.style.color = "red";
-    payoutWarning.textContent = `Maximale uitbetaling is €${formatCurrency(MAX_PAYOUT)}. Je potentiële uitbetaling is €${formatCurrency(potential)}.`;
-    payoutWarning.style.display = "block";
-  } else {
-    payoutElem.style.color = "";
-    payoutWarning.style.display = "none";
-  }
-
-  document.getElementById("potentialPayout").textContent = formatCurrency(potential);
-  sendBtn.disabled = !valid;
-}
-
-document.getElementById("stake").addEventListener("input", updateBetslip);
-
-function sendToDiscord() {
-  const bettorName = document.getElementById("bettorName").value.trim();
-  if (!bettorName) { alert("Vul alsjeblieft je Discord naam in."); return; }
-  if (!bettorName.startsWith("@")) { alert("Je Discord naam moet beginnen met '@'."); return; }
-  if (betslip.length === 0) { alert("Je hebt nog geen weddenschappen toegevoegd."); return; }
-
-  const inzet = parseFloat(document.getElementById("stake").value);
-  if (!inzet || inzet <= 0) { alert("Vul een geldige inzet in."); return; }
-  if (inzet < MIN_INZET || inzet > MAX_INZET) { alert(`Inzet moet tussen €${formatCurrency(MIN_INZET)} en €${formatCurrency(MAX_INZET)} liggen.`); return; }
-
-  const totalOdds = parseFloat(document.getElementById("totalOdds").textContent);
-  const potential = inzet * totalOdds;
-
-  let payoutText = `€${formatCurrency(potential)}`;
-  if (potential > MAX_PAYOUT) {
-      payoutText += ` (Max uitbetaling €${formatCurrency(MAX_PAYOUT)})`;
-  }
-
-  let description = `**Wedder:** ${bettorName}\n**Inzet:** €${formatCurrency(inzet)}\n**Totaal Odds:** ${totalOdds.toFixed(2)}\n**Potentiële Uitbetaling:** ${payoutText}\n\n**Weddenschappen:**\n`;
-  betslip.forEach(bet => {
-    const matchDate = formatDateTimeToNL(bet.match.commence_time);
-    const home = bet.match.home_team || "Deelnemer A";
-    const away = bet.match.away_team || "Deelnemer B";
-    description += `- ${home} - ${away} (${matchDate}) • Winnaar: ${bet.outcome.name} (${bet.odds.toFixed(2)})\n`;
-  });
-
-  const payload = {
-    username: "Koning Dodo",
-    embeds: [{ title: "Nieuwe weddenschap", description, color: 5763719, footer: { text: "Koning Dodo" }, timestamp: new Date().toISOString() }]
-  };
-
-  fetch(webhookURL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  }).then(res => {
-    if (res.ok) {
-      alert("Weddenschap verstuurd naar Discord!");
-      betslip = [];
-      updateBetslip();
-      document.getElementById("bettorName").value = "";
-      document.getElementById("stake").value = "";
-    } else {
-      alert("Er is een fout opgetreden bij het versturen.");
+      // Update height for transition when content injected
+      requestAnimationFrame(() => {
+        const parent = container; parent.style.maxHeight = parent.scrollHeight + 'px';
+      });
     }
-  }).catch(() => alert("Er is een fout opgetreden bij het versturen."));
-}
 
-(async function loadAllLeagues() {
-  const matchesContainer = document.getElementById("matches");
-  for (const [name, key] of Object.entries(leagues)) {
-    matchesContainer.appendChild(createLeagueElement(name, key));
-  }
-})();
-</script>
+    function addBet(match, outcome) {
+      const betId = `${match.id}_h2h_${outcome.name}`;
+      if (betslip.some(b => b.id === betId)) { toast('Deze selectie staat al in je betslip.'); return; }
+      betslip.push({ id: betId, match, outcome, odds: outcome.price });
+      updateBetslip();
+    }
 
+    function updateBetslip() {
+      const betsDiv = document.getElementById('bets');
+      betsDiv.innerHTML = '';
+      let totalOdds = 1;
+      betslip.forEach(bet => {
+        totalOdds *= bet.odds;
+        const home = bet.match.home_team || 'Deelnemer A';
+        const away = bet.match.away_team || 'Deelnemer B';
+        const p = document.createElement('p');
+        p.textContent = `${home} - ${away} • Winnaar: ${bet.outcome.name} (${bet.odds.toFixed(2)})`;
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove';
+        removeBtn.textContent = 'Verwijder';
+        removeBtn.addEventListener('click', () => { betslip = betslip.filter(b => b.id !== bet.id); updateBetslip(); });
+        p.appendChild(removeBtn);
+        betsDiv.appendChild(p);
+      });
+
+      document.getElementById('totalOdds').textContent = totalOdds.toFixed(2);
+      const inzet = parseFloat(document.getElementById('stake').value);
+      const potential = inzet && inzet > 0 ? inzet * totalOdds : 0;
+
+      const stakeInput = document.getElementById('stake');
+      const stakeWarning = document.getElementById('stakeWarning');
+      const payoutElem = document.getElementById('potentialPayout');
+      const payoutWarning = document.getElementById('payoutWarning');
+      const sendBtn = document.getElementById('sendBtn');
+
+      stakeWarning.style.display = 'none';
+      payoutWarning.style.display = 'none';
+      stakeInput.style.boxShadow = '';
+      payoutElem.style.color = '';
+
+      let valid = true;
+
+      if (!inzet || inzet < MIN_INZET) {
+        stakeInput.style.boxShadow = 'inset 0 0 0 2px #ff4343, 0 0 0 4px rgba(255,67,67,.2)';
+        stakeWarning.textContent = `Minimale inzet is €${formatCurrency(MIN_INZET)}.`;
+        stakeWarning.style.display = 'block';
+        valid = false;
+      }
+      if (inzet > MAX_INZET) {
+        stakeInput.style.boxShadow = 'inset 0 0 0 2px #ff4343, 0 0 0 4px rgba(255,67,67,.2)';
+        stakeWarning.textContent = `Maximale inzet is €${formatCurrency(MAX_INZET)}.`;
+        stakeWarning.style.display = 'block';
+        valid = false;
+      }
+      if (potential > MAX_PAYOUT && inzet > 0) {
+        payoutElem.style.color = '#ff4343';
+        payoutWarning.textContent = `Maximale uitbetaling is €${formatCurrency(MAX_PAYOUT)}. Je potentiële uitbetaling is €${formatCurrency(potential)}.`;
+        payoutWarning.style.display = 'block';
+      } else {
+        payoutElem.style.color = '';
+        payoutWarning.style.display = 'none';
+      }
+
+      document.getElementById('potentialPayout').textContent = formatCurrency(potential);
+      sendBtn.disabled = !valid || betslip.length === 0;
+    }
+    document.getElementById('stake').addEventListener('input', updateBetslip);
+
+    function sendToDiscord() {
+      const bettorName = document.getElementById('bettorName').value.trim();
+      if (!bettorName) { toast("Vul alsjeblieft je Discord naam in."); return; }
+      if (!bettorName.startsWith('@')) { toast("Je Discord naam moet beginnen met '@'."); return; }
+      if (betslip.length === 0) { toast("Je hebt nog geen weddenschappen toegevoegd."); return; }
+
+      const inzet = parseFloat(document.getElementById('stake').value);
+      if (!inzet || inzet <= 0) { toast("Vul een geldige inzet in."); return; }
+      if (inzet < MIN_INZET || inzet > MAX_INZET) { toast(`Inzet moet tussen €${formatCurrency(MIN_INZET)} en €${formatCurrency(MAX_INZET)} liggen.`); return; }
+
+      const totalOdds = parseFloat(document.getElementById('totalOdds').textContent);
+      const potential = inzet * totalOdds;
+
+      let payoutText = `€${formatCurrency(potential)}`;
+      if (potential > MAX_PAYOUT) { payoutText += ` (Max uitbetaling €${formatCurrency(MAX_PAYOUT)})`; }
+
+      let description = `**Wedder:** ${bettorName}\n**Inzet:** €${formatCurrency(inzet)}\n**Totaal Odds:** ${totalOdds.toFixed(2)}\n**Potentiële Uitbetaling:** ${payoutText}\n\n**Weddenschappen:**\n`;
+      betslip.forEach(bet => {
+        const matchDate = formatDateTimeToNL(bet.match.commence_time);
+        const home = bet.match.home_team || 'Deelnemer A';
+        const away = bet.match.away_team || 'Deelnemer B';
+        description += `- ${home} - ${away} (${matchDate}) • Winnaar: ${bet.outcome.name} (${bet.odds.toFixed(2)})\n`;
+      });
+
+      const payload = { username: 'Koning Dodo', embeds: [{ title: 'Nieuwe weddenschap', description, color: 5763719, footer: { text: 'Koning Dodo' }, timestamp: new Date().toISOString() }] };
+
+      fetch(webhookURL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+        .then(res => {
+          if (res.ok) {
+            toast('Weddenschap verstuurd naar Discord!');
+            party(); // confetti effect
+            betslip = [];
+            updateBetslip();
+            document.getElementById('bettorName').value = '';
+            document.getElementById('stake').value = '';
+          } else { toast('Er is een fout opgetreden bij het versturen.'); }
+        })
+        .catch(() => toast('Er is een fout opgetreden bij het versturen.'));
+    }
+
+    // ---------- UI sugar: ripple, toast, confetti, particles, bottom-sheet toggle ----------
+    function ripple(ev) {
+      const btn = ev.currentTarget;
+      const r = document.createElement('span');
+      const rect = btn.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      r.style.position = 'absolute'; r.style.left = (ev.clientX - rect.left - size/2) + 'px'; r.style.top = (ev.clientY - rect.top - size/2) + 'px';
+      r.style.width = r.style.height = size + 'px'; r.style.borderRadius = '50%'; r.style.pointerEvents = 'none';
+      r.style.background = 'radial-gradient(circle, rgba(255,255,255,.35), transparent 60%)';
+      r.style.transform = 'scale(0)'; r.style.transition = 'transform .4s ease, opacity .6s ease'; r.style.opacity = '1';
+      btn.style.position = 'relative'; btn.appendChild(r);
+      requestAnimationFrame(() => { r.style.transform = 'scale(1.6)'; r.style.opacity = '0'; });
+      setTimeout(() => r.remove(), 600);
+    }
+
+    let toastEl;
+    function toast(msg) {
+      if (!toastEl) {
+        toastEl = document.createElement('div');
+        toastEl.style.position = 'fixed'; toastEl.style.left = '50%'; toastEl.style.bottom = '20px'; toastEl.style.transform = 'translateX(-50%)';
+        toastEl.style.padding = '10px 14px'; toastEl.style.borderRadius = '12px'; toastEl.style.background = 'rgba(0,0,0,.7)'; toastEl.style.color = '#fff'; toastEl.style.zIndex = '80';
+        toastEl.style.fontWeight = '800'; toastEl.style.boxShadow = '0 10px 24px rgba(0,0,0,.4)'; document.body.appendChild(toastEl);
+      }
+      toastEl.textContent = msg; toastEl.style.opacity = '0';
+      toastEl.style.transition = 'opacity .15s ease'; requestAnimationFrame(() => { toastEl.style.opacity = '1'; });
+      clearTimeout(toastEl._t); toastEl._t = setTimeout(() => { toastEl.style.opacity = '0'; }, 1800);
+    }
+
+    // Particles + Confetti on shared canvas
+    const canvas = document.getElementById('fxCanvas');
+    const ctx = canvas.getContext('2d');
+    let dpr = Math.max(1, window.devicePixelRatio || 1);
+    let W, H;
+    let particles = [];
+    let confetti = [];
+    let motionOK = matchMedia('(prefers-reduced-motion: no-preference)').matches;
+
+    function resize() {
+      W = canvas.width = Math.floor(innerWidth * dpr);
+      H = canvas.height = Math.floor(innerHeight * dpr);
+      canvas.style.width = innerWidth + 'px';
+      canvas.style.height = innerHeight + 'px';
+    }
+    window.addEventListener('resize', resize); resize();
+
+    function spawnParticles(n=60) {
+      particles.length = 0;
+      for (let i=0;i<n;i++) {
+        particles.push({ x: Math.random()*W, y: Math.random()*H, r: (Math.random()*2+0.5)*dpr, vx: (Math.random()-.5)*0.2*dpr, vy: (Math.random()*0.2+0.05)*dpr, a: Math.random()*0.6+0.15 });
+      }
+    }
+    function party() { // burst confetti
+      for (let i=0;i<120;i++) {
+        const angle = Math.random()*Math.PI*2;
+        const speed = (Math.random()*2+1) * dpr;
+        confetti.push({ x: W/2, y: H*0.7, w: (Math.random()*3+1)*dpr, h: (Math.random()*8+3)*dpr, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed - 2*dpr, life: 120+Math.random()*60, hue: Math.random()*360 });
+      }
+    }
+
+    function tick() {
+      ctx.clearRect(0,0,W,H);
+      // particles
+      ctx.globalAlpha = 0.6;
+      particles.forEach(p => {
+        p.x += p.vx; p.y += p.vy; if (p.y > H) { p.y = -10; p.x = Math.random()*W; }
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(36, 209, 126, 0.35)'; ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+      // confetti
+      confetti.forEach((c, i) => {
+        c.x += c.vx; c.y += c.vy; c.vy += 0.02*dpr; c.life -= 1; if (c.life <= 0) confetti[i] = null;
+        ctx.save(); ctx.translate(c.x, c.y); ctx.rotate((120-c.life)/12); ctx.fillStyle = `hsl(${c.hue} 90% 60% / .9)`; ctx.fillRect(-c.w/2, -c.h/2, c.w, c.h); ctx.restore();
+      });
+      confetti = confetti.filter(Boolean);
+      requestAnimationFrame(tick);
+    }
+    if (motionOK) { spawnParticles(); tick(); }
+
+    // Bottom sheet toggle for betslip on mobile
+    const betslipEl = document.getElementById('betslip');
+    const toggleSlipBtn = document.getElementById('toggleSlip');
+    toggleSlipBtn?.addEventListener('click', () => betslipEl.classList.toggle('open'));
+
+    // Initial load
+    (async function loadAllLeagues() {
+      const matchesContainer = document.getElementById('matches');
+      for (const [name, key] of Object.entries(leagues)) {
+        matchesContainer.appendChild(createLeagueElement(name, key));
+      }
+    })();
+  </script>
 </body>
 </html>
-
