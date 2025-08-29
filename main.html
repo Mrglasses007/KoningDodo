@@ -9,47 +9,36 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg1: #030b0f;
-      --bg2: #021b1b;
-      --glass: rgba(0, 20, 10, 0.45);
-      --glass-strong: rgba(0, 40, 20, 0.65);
-      --stroke: #24d17e;
+      /* Brand first: oranje + groen */
       --accent: #ff8c00;
-      --accent-2: #00ffd0;
-      --text: #f2fff7;
-      --muted: #c7f1df;
-      --card: rgba(0, 60, 30, 0.6);
-      --card-hover: rgba(0, 90, 40, 0.8);
+      --mint: #24d17e;
+      --bg1: #04110d; --bg2: #021a1a;
+      --glass: rgba(0, 25, 15, 0.55);
+      --glass-strong: rgba(0, 40, 20, 0.65);
+      --text: #f2fff7; --muted: #c7f1df;
+      --card: rgba(0, 60, 30, 0.6); --card-hover: rgba(0, 90, 40, 0.8);
       --shadow: 0 10px 30px rgba(0,0,0,.35);
-      --radius: 16px;
-      --radius-lg: 22px;
+      --radius: 16px; --radius-lg: 22px;
       --ring: 0 0 0 2px color-mix(in srgb, var(--accent) 70%, transparent);
     }
-
     *, *::before, *::after { box-sizing: border-box; }
     html, body { height: 100%; }
     body {
-      margin: 0;
-      color: var(--text);
+      margin: 0; color: var(--text);
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: radial-gradient(1200px 800px at 10% 10%, #062d1d44 0%, transparent 60%),
-                  radial-gradient(1200px 800px at 90% 10%, #0a2a5a33 0%, transparent 60%),
-                  linear-gradient(120deg, var(--bg1), var(--bg2));
+      background:
+        radial-gradient(1200px 800px at 10% 10%, #0d5a3a30 0%, transparent 60%),
+        radial-gradient(1000px 700px at 90% 20%, #0a2a5a33 0%, transparent 60%),
+        linear-gradient(120deg, var(--bg1), var(--bg2));
       overflow-x: hidden;
     }
 
-    /* Animated gradient sheen */
-    .animated-bg {
-      position: fixed; inset: 0; pointer-events: none; z-index: -1;
-      background: conic-gradient(from 0deg, #0a3822, transparent 30%, #092a3a 60%, transparent 85%);
-      mix-blend-mode: soft-light; opacity: .6;
-      animation: spin 40s linear infinite;
-    }
-    @media (prefers-reduced-motion: reduce) { .animated-bg { animation: none; } }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Particles canvas */
-    #fxCanvas { position: fixed; inset: 0; z-index: -2; display:block; }
+    /* Same cinematic BG as index */
+    .bg{position:fixed; inset:0; z-index:-3; background:url('https://i.imgur.com/y9tD43R.jpeg') center/cover no-repeat fixed; filter:contrast(1.05) saturate(1.1) brightness(.7);}
+    .bg::after{content:""; position:absolute; inset:0; background:radial-gradient(1000px 600px at 50% 20%, transparent 0%, rgba(0,0,0,.45) 70%), linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,.6));}
+    .sheen{position:fixed; inset:-20%; z-index:-2; pointer-events:none; mix-blend-mode:soft-light; opacity:.6; background:conic-gradient(from 0deg,#0a3822,transparent 30%,#092a3a 60%,transparent 85%); animation:spin 50s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    #fxCanvas { position: fixed; inset: 0; z-index: -1; display:block; }
 
     header {
       position: sticky; top: 0; z-index: 50;
@@ -64,7 +53,7 @@
     .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text); }
     .brand img { height: 64px; filter: drop-shadow(0 6px 12px rgba(0,0,0,.5)); }
     .brand-title { font-family: Orbitron, Inter, sans-serif; letter-spacing: .06em; font-weight: 800; font-size: clamp(18px, 4vw, 26px); }
-    .badge { font-size: 12px; padding: 6px 10px; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: #00150a; font-weight: 800; box-shadow: var(--shadow); }
+    .badge { font-size: 12px; padding: 6px 10px; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--mint)); color: #00150a; font-weight: 800; box-shadow: var(--shadow); }
 
     main { max-width: 1200px; margin: 16px auto 60px; padding: 0 20px;
       display: grid; grid-template-columns: 1fr 360px; gap: 22px; align-items: start; }
@@ -74,16 +63,15 @@
       position: sticky; top: 16px; align-self: start; width: 100%;
       background: linear-gradient(180deg, var(--glass-strong), rgba(0,0,0,.25));
       border-radius: var(--radius-lg);
-      border: 1px solid color-mix(in srgb, var(--stroke) 35%, transparent);
+      border: 1px solid color-mix(in srgb, var(--mint) 35%, transparent);
       box-shadow: var(--shadow);
-      padding: 16px 16px 18px;
-      isolation: isolate;
+      padding: 16px 16px 18px; isolation: isolate;
     }
     .betslip::before {
       content:""; position:absolute; inset: -1px; border-radius: inherit; pointer-events:none;
       background: conic-gradient(from 180deg,
                  color-mix(in srgb, var(--accent) 60%, transparent),
-                 transparent 20%, color-mix(in srgb, var(--accent-2) 55%, transparent) 55%, transparent 80%);
+                 transparent 20%, color-mix(in srgb, var(--mint) 55%, transparent) 55%, transparent 80%);
       filter: blur(12px); opacity: .35; z-index:-1;
     }
     .betslip h2 { margin: 0 0 6px; font-size: 20px; letter-spacing:.02em; color: var(--muted); }
@@ -92,10 +80,10 @@
     .input { background: rgba(255,255,255,.07); color: var(--text); outline: none; box-shadow: inset 0 0 0 1px rgba(255,255,255,.07); }
     .input:focus { box-shadow: inset 0 0 0 2px var(--accent), 0 0 0 4px rgba(255,140,0,.15); }
     .row { display:flex; align-items:center; justify-content:space-between; gap: 10px; }
-    .muted { color: #d5ffef; opacity: .8; font-size: 13px; }
+    .muted { color: #d5ffef; opacity: .85; font-size: 13px; }
     .stat { font-weight: 800; }
     .btn {
-      background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: #00150a; font-weight: 900;
+      background: linear-gradient(90deg, var(--accent), var(--mint)); color: #00150a; font-weight: 900;
       cursor: pointer; transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
       box-shadow: 0 8px 20px rgba(255, 140, 0, .25);
     }
@@ -103,37 +91,32 @@
     .btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(255, 140, 0, .35); }
 
     #bets p { margin: 8px 0; background: rgba(0,0,0,.25); padding: 8px 10px; border-radius: 10px; }
-    .remove {
-      margin-left: 8px; background:#900; color:#fff; padding: 4px 8px; border-radius: 8px; font-size: 12px; border:0; cursor:pointer; opacity:.9;
-    }
+    .remove { margin-left: 8px; background:#900; color:#fff; padding: 4px 8px; border-radius: 8px; font-size: 12px; border:0; cursor:pointer; opacity:.9; }
     .remove:hover { opacity:1; filter:brightness(1.05); }
     #stakeWarning, #payoutWarning { color: #ff4343; font-weight: 800; display:none; }
     .bet-info { margin-top: 12px; font-size: 12px; color: #ffe6b5; text-align:center; opacity:.9; }
 
     /* Matches list */
     .matches { min-height: 70vh; }
-
     .league { background: linear-gradient(180deg, var(--glass), rgba(0,0,0,.2)); border-radius: var(--radius-lg);
-      border: 1px solid color-mix(in srgb, var(--stroke) 25%, transparent); padding: 10px; box-shadow: var(--shadow); margin-bottom: 18px; }
+      border: 1px solid color-mix(in srgb, var(--mint) 25%, transparent); padding: 10px; box-shadow: var(--shadow); margin-bottom: 18px; }
     .league-header { display:flex; align-items:center; justify-content:space-between; gap: 10px; cursor:pointer; user-select:none; padding: 6px 8px; border-radius: 12px; }
     .league-header:focus-visible { outline: none; box-shadow: var(--ring); }
     .league-title { display:flex; align-items:center; gap: 10px; }
     .league-icon { width:28px; height:28px; border-radius: 50%; box-shadow: 0 0 0 2px rgba(255, 140, 0, .35); }
     .toggle-icon { font-size: 20px; transition: transform .25s ease; color: var(--muted); }
-    .toggle-icon.open { transform: rotate(90deg); color: var(--accent-2); }
-
+    .toggle-icon.open { transform: rotate(90deg); color: var(--accent); }
     .match-list { overflow: hidden; max-height: 0; opacity: 0; transition: max-height .35s ease, opacity .35s ease; padding: 0 6px; }
     .match-list.open { opacity: 1; }
 
     .match { background: var(--card); border-radius: 14px; padding: 10px; margin: 8px 0; transition: transform .12s ease, background .25s ease, box-shadow .25s ease; cursor: pointer; position: relative; }
     .match:hover { transform: translateY(-1px); background: var(--card-hover); box-shadow: 0 10px 26px rgba(0,0,0,.25); }
-
     .match .title { display:flex; align-items:center; justify-content:space-between; gap: 12px; }
     .live { display:flex; align-items:center; gap:6px; font-weight: 800; color:#ff7171; }
     .dot { width:8px; height:8px; border-radius:50%; background:#ff4343; box-shadow: 0 0 10px #ff4343; animation: blink 1s ease-in-out infinite; }
     @keyframes blink { 50% { opacity:.4; filter:brightness(.7); } }
-
     .meta { font-size: 12px; opacity:.9; color: var(--muted); margin: 4px 0 8px; }
+
     .odds { display:flex; flex-wrap: wrap; gap: 6px; }
     .odds .pick {
       background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03)); border:1px solid rgba(255,255,255,.1);
@@ -143,25 +126,24 @@
 
     /* Mobile betslip: bottom sheet */
     .fab { position: fixed; right: 16px; bottom: 16px; z-index: 70; display:none; }
-    .fab button { border:0; border-radius: 999px; padding: 14px 18px; font-weight: 900; box-shadow: 0 12px 24px rgba(0,0,0,.35); background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: #00150a; cursor:pointer; }
-
+    .fab button { border:0; border-radius: 999px; padding: 14px 18px; font-weight: 900; box-shadow: 0 12px 24px rgba(0,0,0,.35); background: linear-gradient(90deg, var(--accent), var(--mint)); color: #00150a; cursor:pointer; }
     @media (max-width: 980px) {
       main { grid-template-columns: 1fr; }
       .betslip { position: fixed; left: 0; right: 0; bottom: 0; top: auto; border-radius: 18px 18px 0 0; transform: translateY(66%); transition: transform .35s ease; z-index: 60; }
       .betslip.open { transform: translateY(0%); }
       .fab { display:block; }
     }
-
-    /* Accessibility */
     @media (prefers-reduced-motion: reduce) {
       .match:hover { transform:none; }
       .btn, .odds .pick { transition: none; }
+      .sheen{animation:none}
     }
   </style>
 </head>
 <body>
+  <div class="bg" aria-hidden="true"></div>
+  <div class="sheen" aria-hidden="true"></div>
   <canvas id="fxCanvas" aria-hidden="true"></canvas>
-  <div class="animated-bg" aria-hidden="true"></div>
 
   <header>
     <div class="nav">
@@ -174,7 +156,6 @@
 
   <main>
     <section class="matches" id="matches" aria-live="polite"></section>
-
     <aside class="betslip" id="betslip" aria-label="Betslip">
       <h2>Jouw Betslip</h2>
       <div class="field">
@@ -206,25 +187,23 @@
   <div class="fab"><button id="toggleSlip">Betslip</button></div>
 
   <script>
-    // ⚠️ Let op: je API key en Discord webhook staan client-side en zijn publiek zichtbaar in de browser.
-    // Overweeg om dit via een Vercel serverless function te proxien en gevoelige waarden in ENV vars te zetten.
-
+    // ⚠️ Client-side keys zichtbaar. Overweeg Vercel functions + ENV secrets.
     const apiKey = "e7f774dc1fd8d38f2e66f1ae6128ac47";
     const webhookURL = "https://discord.com/api/webhooks/1404901242307608706/KpY04R63ezeTL6WQCFvtLd1HwlA9_JeR0GhtfpVniqMgsOV6lhLtQMuV3-bHeM1LfxwU";
 
-    /** ---------- League icons (SVG badges, geen emoji's) ---------- **/
-    function svgBadge(text, bg = "#0b3d91") {
+    // Brand SVG badges
+    function svgBadge(text, bg="#0b3d91") {
       const svg = `
-        <svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'>
-          <defs>
-            <linearGradient id='g' x1='0' y1='0' x2='0' y2='1'>
-              <stop offset='0%' stop-color='${bg}' stop-opacity='1'/>
-              <stop offset='100%' stop-color='#062b62' stop-opacity='1'/>
-            </linearGradient>
-          </defs>
-          <circle cx='32' cy='32' r='30' fill='url(#g)' stroke='#ff8c00' stroke-width='3'/>
-          <text x='32' y='38' font-family='Arial, Helvetica, sans-serif' font-size='22' fill='#ffffff' text-anchor='middle' font-weight='bold'>${text}</text>
-        </svg>`;
+      <svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'>
+        <defs>
+          <linearGradient id='g' x1='0' y1='0' x2='0' y2='1'>
+            <stop offset='0%' stop-color='${bg}' stop-opacity='1'/>
+            <stop offset='100%' stop-color='#062b62' stop-opacity='1'/>
+          </linearGradient>
+        </defs>
+        <circle cx='32' cy='32' r='30' fill='url(#g)' stroke='#ff8c00' stroke-width='3'/>
+        <text x='32' y='38' font-family='Arial, Helvetica, sans-serif' font-size='22' fill='#ffffff' text-anchor='middle' font-weight='bold'>${text}</text>
+      </svg>`;
       return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
     }
     function leagueIconSrc(name) {
@@ -237,7 +216,7 @@
       }
     }
 
-    /* --------- Leagues --------- */
+    // Leagues
     const leagues = {
       "Eredivisie": "soccer_netherlands_eredivisie",
       "Champions League": ["soccer_uefa_champs_league_qualification", "soccer_uefa_champs_league"],
@@ -254,6 +233,15 @@
     const MIN_FLOOR_LOW = 1.09;
     const MIN_FLOOR_HIGH = 1.12;
 
+    // AudioContext + coin ping
+    let AC; function getAC(){ AC = AC || new (window.AudioContext||window.webkitAudioContext)(); return AC; }
+    function coinPing(v=0.22, dur=0.12, type='triangle', f=920){
+      const ac = getAC(); const o = ac.createOscillator(); const g = ac.createGain();
+      o.type = type; o.frequency.value = f; o.connect(g); g.connect(ac.destination);
+      const t = ac.currentTime; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      o.start(t); o.stop(t + dur + 0.02);
+    }
+
     function randomMinFloor() {
       const val = MIN_FLOOR_LOW + Math.random() * (MIN_FLOOR_HIGH - MIN_FLOOR_LOW);
       return Math.round(val * 100) / 100;
@@ -264,7 +252,6 @@
       if (adj < floor) adj = floor;
       return adj;
     }
-
     function formatDateTimeToNL(utcDate) {
       const date = new Date(utcDate);
       return date.toLocaleString('nl-NL', {
@@ -332,7 +319,6 @@
             matchList.innerHTML = `<p style="color:#ff7171;padding:10px 6px;">Fout bij laden wedstrijden.</p>`;
           }
         }
-        // open with smooth height
         matchList.classList.add('open');
         matchList.style.maxHeight = matchList.scrollHeight + 'px';
       } else {
@@ -358,7 +344,7 @@
     function renderMatches(matches, container, isMMA) {
       container.innerHTML = "";
       const upcoming = (matches || []).filter(m => isWithinNext7Days(m.commence_time));
-      if (!upcoming.length) { container.innerHTML = "<p class=\"muted\" style=\"padding:10px 6px;\">Geen wedstrijden/gevechten in de komende 7 dagen.</p>"; return; }
+      if (!upcoming.length) { container.innerHTML = "<p class='muted' style='padding:10px 6px;'>Geen wedstrijden/gevechten in de komende 7 dagen.</p>"; return; }
 
       upcoming.forEach(match => {
         const bookmaker = match.bookmakers?.[0];
@@ -376,7 +362,7 @@
         el.innerHTML = `
           <div class="title">
             <p style="margin:0;font-weight:800;">${home} - ${away}</p>
-            ${minute ? `<span class=\"live\"><span class=\"dot\"></span>${minute}</span>` : ''}
+            ${minute ? `<span class="live"><span class="dot"></span>${minute}</span>` : ''}
           </div>
           <p class="meta"><em>${startTimeNL}</em></p>
           <div class="odds"></div>
@@ -399,6 +385,7 @@
           btn.addEventListener('click', (ev) => {
             addBet(match, { ...outcome, price: adj, marketKey: 'h2h' });
             ripple(ev);
+            coinPing(0.18,0.08,'sine',1080);
           });
           oddsDiv.appendChild(btn);
         });
@@ -406,7 +393,6 @@
         container.appendChild(el);
       });
 
-      // Update height for transition when content injected
       requestAnimationFrame(() => {
         const parent = container; parent.style.maxHeight = parent.scrollHeight + 'px';
       });
@@ -510,7 +496,8 @@
         .then(res => {
           if (res.ok) {
             toast('Weddenschap verstuurd naar Discord!');
-            party(); // confetti effect
+            coinPing(0.3,0.12,'triangle',980); // 🔊 coin ping bij succes
+            party(); // confetti
             betslip = [];
             updateBetslip();
             document.getElementById('bettorName').value = '';
@@ -565,26 +552,26 @@
     }
     window.addEventListener('resize', resize); resize();
 
-    function spawnParticles(n=60) {
+    function spawnParticles(n=70) {
       particles.length = 0;
       for (let i=0;i<n;i++) {
-        particles.push({ x: Math.random()*W, y: Math.random()*H, r: (Math.random()*2+0.5)*dpr, vx: (Math.random()-.5)*0.2*dpr, vy: (Math.random()*0.2+0.05)*dpr, a: Math.random()*0.6+0.15 });
+        particles.push({ x: Math.random()*W, y: Math.random()*H, r: (Math.random()*2+0.5)*dpr, vx: (Math.random()-.5)*0.25*dpr, vy: (Math.random()*0.2+0.05)*dpr, a: Math.random()*0.6+0.15 });
       }
     }
-    function party() { // burst confetti
-      for (let i=0;i<120;i++) {
+    function party() { // confetti burst
+      for (let i=0;i<140;i++) {
         const angle = Math.random()*Math.PI*2;
         const speed = (Math.random()*2+1) * dpr;
         confetti.push({ x: W/2, y: H*0.7, w: (Math.random()*3+1)*dpr, h: (Math.random()*8+3)*dpr, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed - 2*dpr, life: 120+Math.random()*60, hue: Math.random()*360 });
       }
     }
-
     function tick() {
       ctx.clearRect(0,0,W,H);
       // particles
       ctx.globalAlpha = 0.6;
       particles.forEach(p => {
         p.x += p.vx; p.y += p.vy; if (p.y > H) { p.y = -10; p.x = Math.random()*W; }
+        if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
         ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
         ctx.fillStyle = 'rgba(36, 209, 126, 0.35)'; ctx.fill();
       });
