@@ -132,7 +132,7 @@
   <main>
     <section class="matches" id="matches" aria-live="polite"></section>
 
-    <aside class="betslip" id="betslip" aria-label="Betslip">
+    <aside class="betslip" id="betslip" aria-label="Betslip" aria-expanded="false">
       <h2>Jouw Betslip</h2>
       <div class="field">
         <label for="bettorName" class="muted">Discord naam</label>
@@ -151,12 +151,12 @@
 
       <div class="field">
         <label for="stake" class="muted">Inzet (€)</label>
-        <input class="input" type="number" id="stake" placeholder="75000 – 350000" min="75000" />
+        <input class="input" type="number" id="stake" placeholder="75000 – 500000" min="75000"  max="500000" />
         <span id="stakeWarning"></span>
       </div>
 
       <button class="btn" id="sendBtn" onclick="sendToDiscord()">Verstuur naar Discord</button>
-      <p class="bet-info">Minimale inzet 75K • Maximale inzet 350K • Maximale uitbetaling 2.0M</p>
+      <p class="bet-info">Minimale inzet 75K • Maximale inzet 500K • Maximale uitbetaling 3.0M</p>
     </aside>
   </main>
 
@@ -175,19 +175,46 @@
       const t = ac.currentTime; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
       o.start(t); o.stop(t + dur + 0.02);
     }
-    function whoosh(vol=0.06, dur=0.18, f1=600, f2=1200){
+    // Nieuwe, zachte whoosh (gefilterde brown noise + compressor, zachte ADSR)
+    function whoosh(vol=0.045, dur=0.34){
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       const ac = getAC(); const t = ac.currentTime;
-      const bufferSize = Math.max(1, Math.floor(ac.sampleRate * dur));
-      const buf = ac.createBuffer(1, bufferSize, ac.sampleRate);
+      const n = Math.max(1, Math.floor(ac.sampleRate * Math.max(0.2, dur)));
+      const buf = ac.createBuffer(1, n, ac.sampleRate);
       const data = buf.getChannelData(0);
-      for(let i=0;i<bufferSize;i++){ const fade = 1 - i / bufferSize; data[i] = (Math.random()*2-1) * fade; }
+      // Brown noise (zachter, minder "sissend" dan white noise)
+      let lastOut = 0;
+      for (let i=0;i<n;i++){
+        const white = Math.random()*2 - 1;
+        lastOut = (lastOut + 0.02*white) / 1.02;
+        data[i] = lastOut * 1.6;
+      }
       const src = ac.createBufferSource(); src.buffer = buf;
-      const bp = ac.createBiquadFilter(); bp.type='bandpass'; bp.frequency.setValueAtTime(f1, t); bp.frequency.linearRampToValueAtTime(f2, t+dur);
-      const g = ac.createGain(); g.gain.value = vol;
-      src.connect(bp); bp.connect(g); g.connect(ac.destination);
-      src.start(t); src.stop(t+dur+0.02);
-    }
 
+      const lp = ac.createBiquadFilter(); lp.type = 'lowpass';
+      lp.frequency.setValueAtTime(1800, t); lp.frequency.linearRampToValueAtTime(900, t + dur);
+
+      const hp = ac.createBiquadFilter(); hp.type = 'highpass';
+      hp.frequency.setValueAtTime(90, t); hp.frequency.linearRampToValueAtTime(60, t + dur);
+
+      const comp = ac.createDynamicsCompressor();
+      comp.threshold.value = -26; comp.knee.value = 24; comp.ratio.value = 4; comp.attack.value = 0.005; comp.release.value = 0.22;
+
+      const g = ac.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol, t + 0.03);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+
+      const pan = ac.createStereoPanner ? ac.createStereoPanner() : null;
+      if (pan) pan.pan.setValueAtTime((Math.random()*0.6)-0.3, t);
+
+      // chain
+      src.connect(lp); lp.connect(hp); hp.connect(comp); comp.connect(g);
+      if (pan){ g.connect(pan); pan.connect(ac.destination); } else { g.connect(ac.destination); }
+
+      src.start(t); src.stop(t + dur + 0.02);
+    }
+    
     // League icons
     function svgBadge(text, bg="#0b3d91") {
       const svg = `
@@ -217,7 +244,7 @@
 
     let betslip = [];
     let loadedLeagues = {};
-    const MAX_INZET = 350000, MIN_INZET = 75000, MAX_PAYOUT = 2000000, ODDS_ADJUSTMENT = 0.900;
+    const MAX_INZET = 500000, MIN_INZET = 75000, MAX_PAYOUT = 2000000, ODDS_ADJUSTMENT = 0.900;
     const MIN_FLOOR_LOW = 1.09, MIN_FLOOR_HIGH = 1.12;
 
     function randomMinFloor(){ const val = MIN_FLOOR_LOW + Math.random() * (MIN_FLOOR_HIGH - MIN_FLOOR_LOW); return Math.round(val * 100) / 100; }
