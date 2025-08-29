@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Koning Dodo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -54,12 +54,9 @@
     main { max-width: 1200px; margin: 16px auto 60px; padding: 0 20px; display: grid; grid-template-columns: 1fr 360px; gap: 22px; align-items: start; }
 
     /* Betslip */
-    .betslip { position: sticky; top: 16px; align-self: start; width: 100%; background: linear-gradient(180deg, var(--glass-strong), rgba(0,0,0,.25)); border-radius: var(--radius-lg); border: 1px solid color-mix(in srgb, var(--mint) 35%, transparent); box-shadow: var(--shadow); padding: 0 16px 18px; isolation: isolate; }
+    .betslip { position: sticky; top: 16px; align-self: start; width: 100%; background: linear-gradient(180deg, var(--glass-strong), rgba(0,0,0,.25)); border-radius: var(--radius-lg); border: 1px solid color-mix(in srgb, var(--mint) 35%, transparent); box-shadow: var(--shadow); padding: 16px 16px 18px; isolation: isolate; }
     .betslip::before { content:""; position:absolute; inset: -1px; border-radius: inherit; pointer-events:none; background: conic-gradient(from 180deg, color-mix(in srgb, var(--accent) 60%, transparent), transparent 20%, color-mix(in srgb, var(--mint) 55%, transparent) 55%, transparent 80%); filter: blur(12px); opacity: .35; z-index:-1; }
-    .betslip h2 { margin: 0; font-size: 20px; letter-spacing:.02em; color: var(--muted); }
-    .sheet-header { display:flex; align-items:center; justify-content:space-between; gap: 10px; padding: 12px 0 8px; position: sticky; top: 0; background: linear-gradient(180deg, var(--glass-strong), rgba(0,0,0,.25)); z-index: 1; }
-    .sheet-handle { width: 48px; height: 5px; border-radius: 999px; background: rgba(255,255,255,.28); margin: 0 auto 6px; }
-    .sheet-content { padding-top: 6px; }
+    .betslip h2 { margin: 0 0 6px; font-size: 20px; letter-spacing:.02em; color: var(--muted); }
     .field { display:flex; flex-direction:column; gap:6px; margin: 10px 0 8px; }
     .input, .btn, .pill { width: 100%; border: 0; border-radius: 12px; padding: 12px 14px; font-size: 15px; }
     .input { background: rgba(255,255,255,.07); color: var(--text); outline: none; box-shadow: inset 0 0 0 1px rgba(255,255,255,.07); }
@@ -101,14 +98,13 @@
     .odds .pick { background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03)); border:1px solid rgba(255,255,255,.1); padding: 6px 10px; border-radius: 10px; font-weight: 800; color: #fff; cursor: pointer; transition: transform .12s ease, box-shadow .2s ease, background .2s ease; }
     .odds .pick:hover { transform: translateY(-1px) scale(1.02); box-shadow: 0 6px 18px rgba(0,0,0,.25); }
 
-    .fab { position: fixed; right: 16px; bottom: 16px; z-index: 100; display:none; }
+    .fab { position: fixed; right: 16px; bottom: 16px; z-index: 70; display:none; }
     .fab button { border:0; border-radius: 999px; padding: 14px 18px; font-weight: 900; box-shadow: 0 12px 24px rgba(0,0,0,.35); background: linear-gradient(90deg, var(--accent), var(--mint)); color: #00150a; cursor:pointer; }
 
     @media (max-width: 980px) {
-      main { grid-template-columns: 1fr; padding-bottom: 140px; }
-      .betslip { position: fixed; left: 0; right: 0; bottom: 0; top: auto; border-radius: 18px 18px 0 0; transform: translateY(calc(100% - 54px)); transition: transform .35s ease; z-index: 90; max-height: 85dvh; padding-bottom: calc(env(safe-area-inset-bottom) + 16px); display: grid; grid-template-rows: auto 1fr; overflow: hidden; }
+      main { grid-template-columns: 1fr; }
+      .betslip { position: fixed; left: 0; right: 0; bottom: 0; top: auto; border-radius: 18px 18px 0 0; transform: translateY(66%); transition: transform .35s ease; z-index: 60; }
       .betslip.open { transform: translateY(0%); }
-      .sheet-content { overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding-right: 4px; }
       .fab { display:block; }
     }
 
@@ -136,36 +132,31 @@
   <main>
     <section class="matches" id="matches" aria-live="polite"></section>
 
-    <aside class="betslip" id="betslip" aria-label="Betslip" aria-expanded="false">
-      <div class="sheet-header" id="betslipHeader" role="button" tabindex="0" aria-controls="betslip">
-        <div class="sheet-handle" aria-hidden="true"></div>
-        <h2>Jouw Betslip</h2>
+    <aside class="betslip" id="betslip" aria-label="Betslip">
+      <h2>Jouw Betslip</h2>
+      <div class="field">
+        <label for="bettorName" class="muted">Discord naam</label>
+        <input class="input" type="text" id="bettorName" placeholder="@jouw-naam" required />
       </div>
-      <div class="sheet-content" id="betslipContent">
-        <div class="field">
-          <label for="bettorName" class="muted">Discord naam</label>
-          <input class="input" type="text" id="bettorName" placeholder="@jouw-naam" required />
-        </div>
-        <div id="bets"></div>
-        <div class="row" style="margin-top:8px;">
-          <span class="muted">Totaal Odds:</span>
-          <span class="stat" id="totalOdds">1.00</span>
-        </div>
-        <div class="row">
-          <span class="muted">Potentiële Uitbetaling:</span>
-          <span class="stat">€<span id="potentialPayout">0,00</span></span>
-        </div>
-        <p id="payoutWarning"></p>
-
-        <div class="field">
-          <label for="stake" class="muted">Inzet (€)</label>
-          <input class="input" type="number" id="stake" placeholder="75000 – 500000" min="75000" />
-          <span id="stakeWarning"></span>
-        </div>
-
-        <button class="btn" id="sendBtn" onclick="sendToDiscord()">Verstuur naar Discord</button>
-        <p class="bet-info">Minimale inzet 75K • Maximale inzet 500K • Maximale uitbetaling 3.0M</p>
+      <div id="bets"></div>
+      <div class="row" style="margin-top:8px;">
+        <span class="muted">Totaal Odds:</span>
+        <span class="stat" id="totalOdds">1.00</span>
       </div>
+      <div class="row">
+        <span class="muted">Potentiële Uitbetaling:</span>
+        <span class="stat">€<span id="potentialPayout">0,00</span></span>
+      </div>
+      <p id="payoutWarning"></p>
+
+      <div class="field">
+        <label for="stake" class="muted">Inzet (€)</label>
+        <input class="input" type="number" id="stake" placeholder="75000 – 350000" min="75000" />
+        <span id="stakeWarning"></span>
+      </div>
+
+      <button class="btn" id="sendBtn" onclick="sendToDiscord()">Verstuur naar Discord</button>
+      <p class="bet-info">Minimale inzet 75K • Maximale inzet 350K • Maximale uitbetaling 2.0M</p>
     </aside>
   </main>
 
@@ -184,44 +175,17 @@
       const t = ac.currentTime; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
       o.start(t); o.stop(t + dur + 0.02);
     }
-    // Nieuwe, zachte whoosh (gefilterde brown noise + compressor, zachte ADSR)
-    function whoosh(vol=0.045, dur=0.34){
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    function whoosh(vol=0.06, dur=0.18, f1=600, f2=1200){
       const ac = getAC(); const t = ac.currentTime;
-      const n = Math.max(1, Math.floor(ac.sampleRate * Math.max(0.2, dur)));
-      const buf = ac.createBuffer(1, n, ac.sampleRate);
+      const bufferSize = Math.max(1, Math.floor(ac.sampleRate * dur));
+      const buf = ac.createBuffer(1, bufferSize, ac.sampleRate);
       const data = buf.getChannelData(0);
-      // Brown noise (zachter, minder "sissend" dan white noise)
-      let lastOut = 0;
-      for (let i=0;i<n;i++){
-        const white = Math.random()*2 - 1;
-        lastOut = (lastOut + 0.02*white) / 1.02;
-        data[i] = lastOut * 1.6;
-      }
+      for(let i=0;i<bufferSize;i++){ const fade = 1 - i / bufferSize; data[i] = (Math.random()*2-1) * fade; }
       const src = ac.createBufferSource(); src.buffer = buf;
-
-      const lp = ac.createBiquadFilter(); lp.type = 'lowpass';
-      lp.frequency.setValueAtTime(1800, t); lp.frequency.linearRampToValueAtTime(900, t + dur);
-
-      const hp = ac.createBiquadFilter(); hp.type = 'highpass';
-      hp.frequency.setValueAtTime(90, t); hp.frequency.linearRampToValueAtTime(60, t + dur);
-
-      const comp = ac.createDynamicsCompressor();
-      comp.threshold.value = -26; comp.knee.value = 24; comp.ratio.value = 4; comp.attack.value = 0.005; comp.release.value = 0.22;
-
-      const g = ac.createGain();
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(vol, t + 0.03);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-
-      const pan = ac.createStereoPanner ? ac.createStereoPanner() : null;
-      if (pan) pan.pan.setValueAtTime((Math.random()*0.6)-0.3, t);
-
-      // chain
-      src.connect(lp); lp.connect(hp); hp.connect(comp); comp.connect(g);
-      if (pan){ g.connect(pan); pan.connect(ac.destination); } else { g.connect(ac.destination); }
-
-      src.start(t); src.stop(t + dur + 0.02);
+      const bp = ac.createBiquadFilter(); bp.type='bandpass'; bp.frequency.setValueAtTime(f1, t); bp.frequency.linearRampToValueAtTime(f2, t+dur);
+      const g = ac.createGain(); g.gain.value = vol;
+      src.connect(bp); bp.connect(g); g.connect(ac.destination);
+      src.start(t); src.stop(t+dur+0.02);
     }
 
     // League icons
@@ -253,14 +217,14 @@
 
     let betslip = [];
     let loadedLeagues = {};
-    const MAX_INZET = 500000, MIN_INZET = 75000, MAX_PAYOUT = 3000000, ODDS_ADJUSTMENT = 0.900;
+    const MAX_INZET = 350000, MIN_INZET = 75000, MAX_PAYOUT = 2000000, ODDS_ADJUSTMENT = 0.900;
     const MIN_FLOOR_LOW = 1.09, MIN_FLOOR_HIGH = 1.12;
 
     function randomMinFloor(){ const val = MIN_FLOOR_LOW + Math.random() * (MIN_FLOOR_HIGH - MIN_FLOOR_LOW); return Math.round(val * 100) / 100; }
     function adjustedOdds(price){ let adj = (price || 1) * ODDS_ADJUSTMENT; const floor = randomMinFloor(); if (adj < floor) adj = floor; return adj; }
     function formatDateTimeToNL(utcDate){ const date = new Date(utcDate); return date.toLocaleString('nl-NL', { timeZone: 'Europe/Amsterdam', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
     function formatCurrency(amount){ return amount.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
-    function getMatchMinute(startTime){ const start = new Date(startTime); const now = new Date(); const diffMinutes = Math.floor((now - start) / 60000); if (diffMinutes >= 0 && diffMinutes <= 120) { return \`\${diffMinutes}'\`; } return null; }
+    function getMatchMinute(startTime){ const start = new Date(startTime); const now = new Date(); const diffMinutes = Math.floor((now - start) / 60000); if (diffMinutes >= 0 && diffMinutes <= 120) { return `${diffMinutes}'`; } return null; }
     function isWithinNext7Days(dateString){ const matchDate = new Date(dateString); const now = new Date(); const sevenDaysLater = new Date(now.getTime() + 7*24*60*60*1000); return matchDate >= now && matchDate <= sevenDaysLater; }
 
     function createLeagueElement(name, key) {
@@ -281,7 +245,7 @@
       const toggleIcon = wrap.querySelector('.toggle-icon');
       const matchList = wrap.querySelector('.match-list');
 
-      header.addEventListener('click', () => { whoosh(0.04,0.34); toggleLeague(key, toggleIcon, matchList, header); });
+      header.addEventListener('click', () => { whoosh(0.05,0.18,650,1100); toggleLeague(key, toggleIcon, matchList, header); });
       header.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); header.click(); } });
       return wrap;
     }
@@ -317,7 +281,7 @@
       const keys = Array.isArray(leagueKeyOrKeys) ? leagueKeyOrKeys : [leagueKeyOrKeys];
       const requests = keys.map(key => {
         const url = `https://api.the-odds-api.com/v4/sports/${key}/odds/?apiKey=${apiKey}&regions=eu&markets=h2h&oddsFormat=decimal`;
-        return fetch(url).then(res => { if (!res.ok) throw new Error(\`API error \${res.status} for \${key}\`); return res.json(); });
+        return fetch(url).then(res => { if (!res.ok) throw new Error(`API error ${res.status} for ${key}`); return res.json(); });
       });
       const resultsArrays = await Promise.all(requests);
       const combined = [].concat(...resultsArrays);
@@ -330,7 +294,7 @@
     function renderMatches(matches, container, isMMA) {
       container.innerHTML = "";
       const upcoming = (matches || []).filter(m => isWithinNext7Days(m.commence_time));
-      if (!upcoming.length) { container.innerHTML = "<p class=\\"muted\\" style=\\"padding:10px 6px;\\">Geen wedstrijden/gevechten in de komende 7 dagen.</p>"; return; }
+      if (!upcoming.length) { container.innerHTML = "<p class=\"muted\" style=\"padding:10px 6px;\">Geen wedstrijden/gevechten in de komende 7 dagen.</p>"; return; }
 
       upcoming.forEach(match => {
         const bookmaker = match.bookmakers?.[0];
@@ -346,12 +310,12 @@
         const el = document.createElement('div');
         el.className = 'match';
         el.innerHTML = `
-          <div class=\\"title\\">
-            <p style=\\"margin:0;font-weight:800;\\">${home} - ${away}</p>
-            ${minute ? `<span class=\\"live\\"><span class=\\"dot\\"></span>${minute}</span>` : ''}
+          <div class=\"title\">
+            <p style=\"margin:0;font-weight:800;\">${home} - ${away}</p>
+            ${minute ? `<span class=\"live\"><span class=\"dot\"></span>${minute}</span>` : ''}
           </div>
-          <p class=\\"meta\\"><em>${startTimeNL}</em></p>
-          <div class=\\"odds\\"></div>
+          <p class=\"meta\"><em>${startTimeNL}</em></p>
+          <div class=\"odds\"></div>
         `;
 
         const sortedOutcomes = isMMA || !match.home_team ? [...outcomes] : [...outcomes].sort((a, b) => { if (a.name === match.home_team) return -1; if (b.name === match.home_team) return 1; return 0; });
@@ -377,12 +341,6 @@
       if (betslip.some(b => b.id === betId)) { toast('Deze selectie staat al in je betslip.'); return; }
       betslip.push({ id: betId, match, outcome, odds: outcome.price });
       updateBetslip();
-      // Auto open betslip op mobiel
-      if (window.matchMedia('(max-width: 980px)').matches) {
-        const betslipEl = document.getElementById('betslip');
-        betslipEl.classList.add('open');
-        betslipEl.setAttribute('aria-expanded', 'true');
-      }
     }
 
     function updateBetslip() {
@@ -507,7 +465,7 @@
       if (!toastEl) {
         toastEl = document.createElement('div');
         toastEl.style.position = 'fixed'; toastEl.style.left = '50%'; toastEl.style.bottom = '20px'; toastEl.style.transform = 'translateX(-50%)';
-        toastEl.style.padding = '10px 14px'; toastEl.style.borderRadius = '12px'; toastEl.style.background = 'rgba(0,0,0,.7)'; toastEl.style.color = '#fff'; toastEl.style.zIndex = '120';
+        toastEl.style.padding = '10px 14px'; toastEl.style.borderRadius = '12px'; toastEl.style.background = 'rgba(0,0,0,.7)'; toastEl.style.color = '#fff'; toastEl.style.zIndex = '80';
         toastEl.style.fontWeight = '800'; toastEl.style.boxShadow = '0 10px 24px rgba(0,0,0,.4)'; document.body.appendChild(toastEl);
       }
       toastEl.textContent = msg; toastEl.style.opacity = '0';
@@ -538,21 +496,7 @@
 
     const betslipEl = document.getElementById('betslip');
     const toggleSlipBtn = document.getElementById('toggleSlip');
-    toggleSlipBtn?.addEventListener('click', () => {
-      betslipEl.classList.toggle('open');
-      betslipEl.setAttribute('aria-expanded', String(betslipEl.classList.contains('open')));
-    });
-    // Header toggle (handig als FAB niet zichtbaar is)
-    const betslipHeader = document.getElementById('betslipHeader');
-    betslipHeader?.addEventListener('click', () => {
-      if (window.matchMedia('(max-width: 980px)').matches) {
-        betslipEl.classList.toggle('open');
-        betslipEl.setAttribute('aria-expanded', String(betslipEl.classList.contains('open')));
-      }
-    });
-    betslipHeader?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); betslipHeader.click(); }
-    });
+    toggleSlipBtn?.addEventListener('click', () => betslipEl.classList.toggle('open'));
 
     (async function loadAllLeagues() { const matchesContainer = document.getElementById('matches'); for (const [name, key] of Object.entries(leagues)) { matchesContainer.appendChild(createLeagueElement(name, key)); } })();
   </script>
