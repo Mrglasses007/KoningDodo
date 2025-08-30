@@ -244,7 +244,7 @@
 
     let betslip = [];
     let loadedLeagues = {};
-    const MAX_INZET = 500000, MIN_INZET = 75000, MAX_PAYOUT = 2000000, ODDS_ADJUSTMENT = 0.900;
+    const MAX_INZET = 500000, MIN_INZET = 75000, MAX_PAYOUT = 3000000, ODDS_ADJUSTMENT = 0.900;
     const MIN_FLOOR_LOW = 1.09, MIN_FLOOR_HIGH = 1.12;
 
     function randomMinFloor(){ const val = MIN_FLOOR_LOW + Math.random() * (MIN_FLOOR_HIGH - MIN_FLOOR_LOW); return Math.round(val * 100) / 100; }
@@ -529,3 +529,4 @@
   </script>
 </body>
 </html>
+
