@@ -311,7 +311,12 @@
         return fetch(url).then(res => { if (!res.ok) throw new Error(`API error ${res.status} for ${key}`); return res.json(); });
       });
       const resultsArrays = await Promise.all(requests);
-      const combined = [].concat(...resultsArrays);
+      const combined = [];
+      resultsArrays.forEach((arr, idx) => {
+        const key = keys[idx];
+        (arr || []).forEach(ev => { try { ev.sport_key = key; } catch(_){} });
+        combined.push(...(arr || []));
+      });
       const seen = new Set();
       const deduped = combined.filter(m => { if (seen.has(m.id)) return false; seen.add(m.id); return true; });
       deduped.sort((a, b) => new Date(a.commence_time) - new Date(b.commence_time));
@@ -527,6 +532,44 @@
 
     (async function loadAllLeagues() { const matchesContainer = document.getElementById('matches'); for (const [name, key] of Object.entries(leagues)) { matchesContainer.appendChild(createLeagueElement(name, key)); } })();
   </script>
+
+<script>
+// Inject metadata embed into Discord webhook payload for auto-settle
+(function(){
+  const __origFetch = window.fetch;
+  window.fetch = function(url, options){
+    try {
+      if (typeof url === 'string' && url.includes('discord.com/api/webhooks') && options && options.method === 'POST' && options.body){
+        const payload = JSON.parse(options.body);
+        if (payload && Array.isArray(payload.embeds)){
+          const meta = {
+            v: 1,
+            l: (window.betslip || []).map(function(bet){
+              return {
+                sk: (bet.match && (bet.match.sport_key || bet.match.__sport_key)) || null,
+                id: bet.match && bet.match.id,
+                ct: bet.match && bet.match.commence_time,
+                h: bet.match && (bet.match.home_team || (bet.outcome && bet.outcome.name)),
+                a: bet.match && (bet.match.away_team || null),
+                m: 'h2h',
+                p: bet.outcome && bet.outcome.name,
+                pr: bet.odds
+              };
+            }),
+            created_at: new Date().toISOString()
+          };
+          payload.embeds.push({
+            title: 'metadata',
+            description: '```json\n' + JSON.stringify(meta) + '\n```'
+          });
+          options.body = JSON.stringify(payload);
+        }
+      }
+    } catch (e) { /* noop */ }
+    return __origFetch.apply(this, arguments);
+  };
+})();
+</script>
+
 </body>
 </html>
-
