@@ -252,6 +252,8 @@
     };
 
     let betslip = [];
+    // Expose on window so the webhook metadata injector can access it
+    window.betslip = betslip;
     let loadedLeagues = {};
     const MAX_INZET = 500000, MIN_INZET = 75000, MAX_PAYOUT = 3000000, ODDS_ADJUSTMENT = 0.900;
     const MIN_FLOOR_LOW = 1.09, MIN_FLOOR_HIGH = 1.12;
@@ -380,7 +382,8 @@
     function addBet(match, outcome) {
       const betId = `${match.id}_h2h_${outcome.name}`;
       if (betslip.some(b => b.id === betId)) { toast('Deze selectie staat al in je betslip.'); return; }
-      betslip.push({ id: betId, match, outcome, odds: outcome.price });
+      betslip.push({ id: betId, match, outcome, odds: outcome.price, sk: (match && (match.sport_key || match.__sport_key)) || null });
+      window.betslip = betslip;
       updateBetslip();
     }
 
@@ -397,7 +400,9 @@
         const removeBtn = document.createElement('button');
         removeBtn.className = 'remove';
         removeBtn.textContent = 'Verwijder';
-        removeBtn.addEventListener('click', () => { betslip = betslip.filter(b => b.id !== bet.id); updateBetslip(); });
+        removeBtn.addEventListener('click', () => { betslip = betslip.filter(b => b.id !== bet.id);
+        window.betslip = betslip;
+        updateBetslip(); });
         p.appendChild(removeBtn);
         betsDiv.appendChild(p);
       });
@@ -478,6 +483,7 @@
             coinPing(0.3,0.12,'triangle',980); // ping bij succes
             party(); // confetti effect
             betslip = [];
+            window.betslip = betslip;
             updateBetslip();
             document.getElementById('bettorName').value = '';
             document.getElementById('stake').value = '';
