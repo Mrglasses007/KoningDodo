@@ -229,16 +229,25 @@
       switch (name) {
         case "Eredivisie": return svgBadge("NL", "#006400");
         case "Champions League": return svgBadge("UCL", "#0b3d91");
+        case "UEFA Europa League": return svgBadge("UEL", "#5a3e0a");
+        case "WK (FIFA)": return svgBadge("WK", "#11605a");
         case "Jupiler Pro League": return svgBadge("BE", "#c8102e");
         case "MMA / UFC": return svgBadge("UFC", "#d20a0a");
         default: return svgBadge("KD", "#444");
       }
     }
 
+    // ——— Leagues (volgorde aangepast) ———
     const leagues = {
       "Eredivisie": "soccer_netherlands_eredivisie",
-      "Champions League": ["soccer_uefa_champs_league_qualification", "soccer_uefa_champs_league"],
       "Jupiler Pro League": "soccer_belgium_first_div",
+      "WK (FIFA)": [
+        "soccer_fifa_world_cup_qualifiers_europe",
+        "soccer_fifa_world_cup_qualifiers_south_america",
+        "soccer_fifa_world_cup"
+      ],
+      "Champions League": ["soccer_uefa_champs_league_qualification", "soccer_uefa_champs_league"],
+      "UEFA Europa League": ["soccer_uefa_europa_league"],
       "MMA / UFC": "mma_mixed_martial_arts"
     };
 
