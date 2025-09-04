@@ -117,7 +117,63 @@
     @media (max-width: 1100px){ .features{grid-template-columns:repeat(2,1fr);} }
     @media (max-width: 640px){ .features{grid-template-columns:1fr;} .hero{grid-template-columns:1fr; min-height:unset} .hero-visual{order:-1} }
     @media (prefers-reduced-motion: reduce){ .sheen{animation:none} .coin{animation:none} .coin::after{animation:none} }
-  </style>
+  
+/* —— Header Discord CTA —— */
+.discord-cta{display:inline-flex; align-items:center; gap:10px; text-decoration:none; font-weight:900; border-radius:12px; padding:10px 14px; background:#5865F2; color:#fff; box-shadow:0 8px 20px rgba(88,101,242,.35); border:1px solid rgba(255,255,255,.12); transition:transform .12s ease, box-shadow .2s ease; position:relative; overflow:hidden;}
+.discord-cta img{width:20px; height:20px; display:block}
+.discord-cta:hover{transform:translateY(-1px); box-shadow:0 12px 26px rgba(88,101,242,.45);}
+.discord-cta::after{content:""; position:absolute; inset:0; background:linear-gradient(120deg, rgba(255,255,255,.28), transparent 40%); transform:skewX(-20deg) translateX(-120%); transition:transform .6s ease;}
+.discord-cta:hover::after{transform:skewX(-20deg) translateX(120%);}
+
+/* —— Discord panel (replaces coin) —— */
+.discord-hero{display:grid; grid-template-columns:1.1fr .9fr; gap:18px; align-items:center; padding:24px; border-radius:22px;
+  background: radial-gradient(80% 120% at 10% 10%, rgba(88,101,242,.28), transparent 60%),
+              radial-gradient(80% 120% at 90% 90%, rgba(36,209,126,.18), transparent 60%),
+              linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  border:1px solid rgba(255,255,255,.14); box-shadow:0 20px 50px rgba(0,0,0,.35);}
+.discord-hero .pill{display:inline-block; font-size:12px; font-weight:800; letter-spacing:.4px; padding:6px 10px; border-radius:999px;
+  background:linear-gradient(90deg, var(--accent), var(--mint)); color:#062414; box-shadow:0 6px 14px rgba(255,140,0,.28);}
+.discord-hero h2{font-family:var(--font-2, Inter), system-ui; font-size:clamp(24px, 3.2vmax, 36px); line-height:1.08; margin:10px 0 8px; color:#fff;}
+.discord-hero .lede{opacity:.95; max-width:48ch}
+.discord-hero .actions{display:flex; align-items:center; gap:14px; margin-top:12px}
+.discord-hero .actions .note{opacity:.8; font-size:13px}
+.discord-hero .right{display:grid; place-items:center}
+.discord-hero .orb{width:min(42vmin, 380px); aspect-ratio:1/1; border-radius:50%;
+  background: radial-gradient(circle at 30% 30%, rgba(88,101,242,.55), rgba(0,0,0,.0) 40%),
+              radial-gradient(circle at 70% 70%, rgba(36,209,126,.35), rgba(0,0,0,.0) 45%),
+              linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.2));
+  border:1px solid rgba(255,255,255,.1); display:grid; place-items:center; box-shadow:inset 0 0 80px rgba(88,101,242,.35), 0 18px 50px rgba(0,0,0,.45)}
+.discord-hero .orb img{width:38%; height:auto; filter:drop-shadow(0 18px 28px rgba(0,0,0,.4))}
+.discord-cta.big{font-size:20px; padding:16px 22px; border-radius:16px; white-space:nowrap}
+@media (max-width: 980px){ .discord-hero{grid-template-columns:1fr} .discord-hero .right{display:none} }
+
+
+/* —— Center containers —— */
+.hero-container{max-width:1200px; margin:0 auto; padding:0 18px}
+.nav{max-width:1200px; margin:0 auto; padding:12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px}
+
+
+/* —— Layout fix: put Discord panel on the right —— */
+.hero-container{max-width:1200px; margin:0 auto; padding:0 18px; display:grid; grid-template-columns:1.15fr .85fr; gap:22px; align-items:start}
+.hero-container .hero-card{grid-column:1}
+.hero-container .cta-row{grid-column:1}
+.hero-container .features{grid-column:1; margin-top:10px; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px}
+.hero-container .hero-visual{grid-column:2; align-self:start}
+@media (max-width:1100px){ .hero-container .features{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:720px){ .hero-container{grid-template-columns:1fr} .hero-container .hero-visual{grid-column:1; margin-top:12px} .hero-container .features{grid-template-columns:1fr} }
+
+
+/* —— v5: make right Discord panel smaller to keep 4 info cards in one row —— */
+.hero-container{grid-template-columns:1.6fr .4fr !important; gap:20px !important}
+.hero-container .features{grid-template-columns:repeat(4, 1fr) !important; gap:14px !important; margin-top:12px !important}
+.hero-container .hero-visual{grid-column:2; justify-self:end; align-self:start; width:100%; max-width:380px}
+/* tighten the discord panel slightly */
+.discord-hero{padding:18px !important}
+.discord-hero h2{font-size:clamp(22px, 2.6vmax, 32px) !important}
+.discord-hero .orb{max-width:300px !important}
+.discord-cta.big{font-size:18px !important; padding:14px 18px !important}
+
+</style>
 </head>
 <body>
   <div class="bg" aria-hidden="true"></div>
@@ -131,11 +187,17 @@
         <h1>KONING DODO</h1>
       </a>
       <span class="tag">Roleplay WEDKANTOOR</span>
+    
+      <a class="discord-cta" href="https://discord.gg/ZqANTkrGQf" target="_blank" rel="noopener" aria-label="Join onze Discord">
+        <img src="https://cdn.simpleicons.org/discord/FFFFFF" alt="" aria-hidden="true" />
+        <span>Join Discord</span>
+      </a>
     </nav>
   </header>
 
   <main>
     <section class="hero" id="hero">
+  <div class="hero-container">
       <div class="hero-card" id="tilt">
         <div class="logo-wrap">
           <img src="https://i.imgur.com/YpEK9A2.png" alt="Koning Dodo" />
@@ -173,31 +235,29 @@
         </div>
       </div>
 
-      <div class="hero-visual" aria-hidden="true">
-        <div class="coin" id="heroCoin" title="KD Coin">
-          <!-- KD monogram: donkere laag + highlight offset voor echt 'ingeslagen' effect -->
-          <div class="stamp">
-            <svg viewBox="0 0 100 100" aria-hidden="true">
-              <defs>
-                <linearGradient id="kdGrad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stop-color="#ffe7b6" stop-opacity="0.95"/>
-                  <stop offset="100%" stop-color="#8c4a00" stop-opacity="0.95"/>
-                </linearGradient>
-                <filter id="kdEmboss" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur in="SourceAlpha" stdDeviation="0.9" result="blur"/>
-                  <feOffset in="blur" dx="-0.6" dy="0.6" result="off"/>
-                  <feComposite in="off" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="inner"/>
-                  <feMerge>
-                    <feMergeNode in="inner"/>
-                    <feMergeNode in="SourceGraphic"/>
-                  </feMerge>
-                </filter>
-              </defs>
-              <g transform="translate(50,50)">
-                <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-family="Orbitron, Inter, sans-serif" font-size="48" font-weight="800" letter-spacing="2" fill="url(#kdGrad)" stroke="#ffdfae" stroke-opacity="0.35" stroke-width="0.6" filter="url(#kdEmboss)">KD</text>
-              </g>
-            </svg>
+      
+      <div class="hero-visual">
+        <section class="discord-hero" aria-labelledby="discordHeroTitle">
+          <div class="left">
+            <div class="pill">Verplicht voor inzetten</div>
+            <h2 id="discordHeroTitle">Zonder Discord kun je niet inzetten</h2>
+            <p class="lede"><strong>Belangrijk:</strong> Zonder Discord-account kun je <strong>geen</strong> weddenschappen plaatsen. Word lid en koppel je account.</p>
+            <div class="actions">
+              <a class="discord-cta big" href="https://discord.gg/ZqANTkrGQf" target="_blank" rel="noopener">
+                <img src="https://cdn.simpleicons.org/discord/FFFFFF" alt="" aria-hidden="true" />
+                <span>La Sombra Familia</span>
+              </a>
+            </div>
           </div>
+          <div class="right" aria-hidden="true">
+            <div class="orb">
+              <img src="https://cdn.simpleicons.org/discord/5865F2" alt="" />
+            </div>
+          </div>
+          </div>
+</section>
+      </div>
+
         </div>
       </div>
     </section>
@@ -252,7 +312,7 @@
     window.addEventListener('resize', resize); resize();
 
     function spawnParticles(n=50){ particles.length = 0; for(let i=0;i<n;i++){ particles.push({ x:Math.random()*W, y:Math.random()*H, r:(Math.random()*1.6+0.6)*dpr, vx:(Math.random()-.5)*0.18*dpr, vy:(Math.random()*0.18+0.04)*dpr, a:Math.random()*0.5+0.12 }); } }
-    function spawnCoins(n=28){ coins.length = 0; const cx=W*0.75, cy=H*0.35, R=Math.min(W,H)*0.24; for(let i=0;i<n;i++){ coins.push({ angle: Math.random()*Math.PI*2, speed:(0.0012 + Math.random()*0.0026) * (Math.random()<.5?-1:1), R: R*(.65 + Math.random()*.85), size:(8+Math.random()*16)*dpr, z: Math.random() }); } }
+    function spawnCoins(){ coins.length = 0; }); } }
 
     function drawMiniCoin(x,y,size,rot){
       ctx.save(); ctx.translate(x,y); ctx.rotate(rot);
