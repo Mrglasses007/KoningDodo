@@ -6,7 +6,7 @@
   <title>Koning Dodo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
       --accent: #ff8c00; /* Oranje */
@@ -45,7 +45,7 @@
       backdrop-filter: blur(6px);
       border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
     }
-    .nav { max-width: 1200px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .nav{max-width:1200px; margin:0 auto; padding:12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px}
     .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text); }
     .brand img { height: 64px; filter: drop-shadow(0 6px 12px rgba(0,0,0,.5)); }
     .brand-title { font-family: Orbitron, Inter, sans-serif; letter-spacing: .06em; font-weight: 800; font-size: clamp(18px, 4vw, 26px); }
@@ -113,7 +113,47 @@
       .btn, .odds .pick { transition: none; }
       .sheen{animation:none}
     }
-  </style>
+  
+    /* —— Discord CTA + Banner —— */
+    .discord-cta{display:inline-flex; align-items:center; gap:10px; text-decoration:none; font-weight:900; border-radius:12px; padding:10px 14px; background:#5865F2; color:#fff; box-shadow:0 8px 20px rgba(88,101,242,.35); border:1px solid rgba(255,255,255,.12); transition:transform .12s ease, box-shadow .2s ease; position:relative; overflow:hidden;}
+    .discord-cta img{width:20px; height:20px; display:block; filter:drop-shadow(0 2px 6px rgba(0,0,0,.25));}
+    .discord-cta:hover{transform:translateY(-1px); box-shadow:0 12px 26px rgba(88,101,242,.45);}
+    .discord-cta::after{content:""; position:absolute; inset:0; background:linear-gradient(120deg, rgba(255,255,255,.28), transparent 40%); transform:skewX(-20deg) translateX(-120%); transition:transform .6s ease;}
+    .discord-cta:hover::after{transform:skewX(-20deg) translateX(120%);}
+
+    .discord-banner{display:flex; align-items:center; gap:14px; background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03)); border:1px solid rgba(255,255,255,.14); border-radius:16px; padding:12px 14px; box-shadow:var(--shadow);}
+    .discord-banner .dicon{width:44px; height:44px; border-radius:12px; display:grid; place-items:center; background:#0f1433; box-shadow: inset 0 0 0 2px #5865F2, 0 6px 16px rgba(0,0,0,.35);}
+    .discord-banner .dicon img{width:26px; height:26px;}
+    .discord-banner .dtext{flex:1; font-size:14px; color:var(--text);}
+    .discord-banner .dtext strong{color:#fff;}
+    .discord-banner .dtext em{display:block; opacity:.9; color:#ffe6b5; font-style:normal; margin-top:2px;}
+    .discord-banner .djoin{white-space:nowrap; display:inline-flex; align-items:center; justify-content:center; padding:10px 14px; border-radius:12px; background:linear-gradient(90deg, var(--accent), var(--mint)); color:#00150a; font-weight:900; text-decoration:none; box-shadow:0 10px 24px rgba(255,140,0,.28);}
+    .discord-banner.emphasis{border:1px solid color-mix(in srgb, #5865F2 35%, #ffffff 10%); background:linear-gradient(180deg, rgba(88,101,242,.18), rgba(0,0,0,.15));}
+
+
+    /* —— Header layout for Discord CTA (main) —— */
+    header .nav{max-width:1200px; margin:0 auto; padding:12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px}
+    header .brand{display:flex; align-items:center; gap:12px; text-decoration:none}
+    header .brand .brand-title{font-weight:900; letter-spacing:.6px}
+    header .nav .discord-cta{margin-left:auto}
+    
+
+    /* —— V3 header tuning —— */
+    header .nav{max-width:1200px; margin:0 auto; padding:12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px}
+    @media (max-width: 560px){ header .nav{max-width:1200px; margin:0 auto; padding:12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px} }
+    header .brand{display:flex; align-items:center; gap:10px}
+    header .discord-cta{flex:0 0 auto}
+    
+
+/* —— v4 header layout —— */
+header .nav{max-width:1200px; margin:0 auto; padding:12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px}
+header .brand{display:flex; align-items:center; gap:12px; text-decoration:none}
+header 
+@media (max-width: 560px){ header .nav{max-width:1200px; margin:0 auto; padding:12px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px} }
+
+.tag{font-size:12px; padding:6px 10px; border-radius:999px; background:linear-gradient(90deg,var(--accent), var(--mint)); color:#00150a; font-weight:900; box-shadow:var(--shadow)}
+h1{font:800 clamp(18px,4vw,26px)/1 Orbitron, Inter, sans-serif; letter-spacing:.06em; margin:0}
+</style>
 </head>
 <body>
   <div class="bg" aria-hidden="true"></div>
@@ -121,15 +161,22 @@
   <canvas id="fxCanvas" aria-hidden="true"></canvas>
 
   <header>
-    <div class="nav">
-      <a class="brand" href="#" aria-label="Koning Dodo">
+    <nav class="nav" aria-label="Hoofdnavigatie">
+      <a href="#" class="brand" aria-label="Koning Dodo home">
         <img src="https://i.imgur.com/YpEK9A2.png" alt="Koning Dodo logo" />
-        <div class="brand-title">KONING DODO <span class="badge">Roleplay WEDKANTOOR</span></div>
+        <h1>KONING DODO</h1>
       </a>
-    </div>
+      <span class="tag">Roleplay WEDKANTOOR</span>
+    
+      <a class="discord-cta" href="https://discord.gg/ZqANTkrGQf" target="_blank" rel="noopener" aria-label="Join onze Discord">
+        <img src="https://cdn.simpleicons.org/discord/FFFFFF" alt="" aria-hidden="true" />
+        <span>Join Discord</span>
+      </a>
+    </nav>
   </header>
 
   <main>
+
     <section class="matches" id="matches" aria-live="polite"></section>
 
     <aside class="betslip" id="betslip" aria-label="Betslip" aria-expanded="false">
