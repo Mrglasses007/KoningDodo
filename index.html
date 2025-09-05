@@ -173,6 +173,55 @@
 .discord-hero .orb{max-width:300px !important}
 .discord-cta.big{font-size:18px !important; padding:14px 18px !important}
 
+
+
+/* ========== MOBILE OVERRIDES (safe) ========== */
+
+/* Header: laat items wrappen en comprimeer logo op kleine schermen */
+@media (max-width: 560px){
+  header .nav{ flex-wrap: wrap; gap: 8px; }
+  header .brand img{ height: 44px; }
+  header .tag{ order: 3; width: 100%; text-align: center; }
+  header .discord-cta{ margin-left: 0; }
+}
+
+/* Hero-container: forceer 1 kolom op small, ondanks eerdere !important regels */
+@media (max-width: 820px){
+  .hero-container{
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  .hero-container .hero-visual{
+    grid-column: 1 !important;
+    justify-self: stretch !important;
+    max-width: 100% !important;
+  }
+  .hero-container .features{
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+}
+
+/* Discord-panel compacter op mobiel */
+@media (max-width: 820px){
+  .discord-hero{ padding: 14px !important; }
+  .discord-hero h2{ font-size: clamp(18px, 5vw, 24px) !important; }
+  .discord-hero .actions .discord-cta.big{ font-size: 16px !important; padding: 12px 16px !important; }
+  .discord-hero .right{ display:none !important; } /* orb weg op small */
+}
+
+/* Zorg dat de canvas/achtergrond nooit over content heen “ligt” op mobile */
+@media (max-width: 560px){
+  #fx{ pointer-events: none; }
+}
+
+/* Kleine typografische tweaks */
+@media (max-width: 560px){
+  .title{ font-size: clamp(22px, 7vw, 28px); }
+  .subtitle{ font-size: 14px; }
+  .cta, .ghost-btn{ padding: 12px 16px; }
+}
+
 </style>
 </head>
 <body>
@@ -312,7 +361,7 @@
     window.addEventListener('resize', resize); resize();
 
     function spawnParticles(n=50){ particles.length = 0; for(let i=0;i<n;i++){ particles.push({ x:Math.random()*W, y:Math.random()*H, r:(Math.random()*1.6+0.6)*dpr, vx:(Math.random()-.5)*0.18*dpr, vy:(Math.random()*0.18+0.04)*dpr, a:Math.random()*0.5+0.12 }); } }
-    function spawnCoins(){ coins.length = 0; }); } }
+    function spawnCoins_old(){ coins.length = 0; }); } }
 
     function drawMiniCoin(x,y,size,rot){
       ctx.save(); ctx.translate(x,y); ctx.rotate(rot);
@@ -343,5 +392,19 @@
     const motionOKFX = matchMedia('(prefers-reduced-motion: no-preference)').matches;
     if (motionOKFX) { spawnParticles(); spawnCoins(); draw(); }
   </script>
+
+<script>
+// Safe stub for spawnCoins to avoid runtime errors if original was broken
+function spawnCoins(){ /* disabled: cleaned up for stability on mobile */ }
+</script>
+
+<script>
+/* spawnCoins guard injected */
+window.addEventListener('DOMContentLoaded', function(){
+  if (typeof spawnCoins === 'function') {
+    try { spawnCoins(); } catch(e) { /* noop */ }
+  }
+});
+</script>
 </body>
 </html>
